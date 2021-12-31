@@ -170,11 +170,15 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\dev\janus-engine\build\SceneEditor.vcxproj">
+    <ProjectReference Include="C:\dev\janus-engine\build\SceneEditor\SceneEditor.vcxproj">
       <Project>{5E617E4F-3225-3BA1-980E-DF2DB1B29A70}</Project>
       <Name>SceneEditor</Name>
     </ProjectReference>
-    <ProjectReference Include="C:\dev\janus-engine\build\janus.vcxproj">
+    <ProjectReference Include="C:\dev\janus-engine\build\Janus\vendors\glfw\src\glfw.vcxproj">
+      <Project>{6077AD27-026D-32B6-9111-9F066883B8BF}</Project>
+      <Name>glfw</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\janus-engine\build\Janus\janus.vcxproj">
       <Project>{11A6BC09-5AEE-36F4-BD03-7C84FE246073}</Project>
       <Name>janus</Name>
     </ProjectReference>
