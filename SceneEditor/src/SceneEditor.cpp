@@ -5,10 +5,15 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class SceneEditorLayer : public Janus::Layer
+class SceneSceneEditorLayer : public Janus::Layer
 {
     public:
-        SceneEditorLayer()
+    	enum class PropertyFlag
+		{
+			None = 0, ColorProperty = 1, DragProperty = 2, SliderProperty = 4
+		};
+    public:
+        SceneSceneEditorLayer()
             : Layer("Scene Editor"), m_EditorCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f))
         { 
             m_Scene = Janus::CreateRef<Janus::Scene>("Test Scene");
@@ -19,7 +24,7 @@ class SceneEditorLayer : public Janus::Layer
             Janus::Light light;
             light.Position = {1.0f, 5.0f, 0.0f};
             light.Radiance = {0.5,0.5,0.5};
-
+            
             m_Scene->SetLight(light);
 
         }
@@ -40,13 +45,18 @@ class SceneEditorLayer : public Janus::Layer
 			    (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		    {
 			    m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			    m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+                Janus::Renderer::OnWindowResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+                m_EditorCamera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), m_ViewportSize.x, m_ViewportSize.y, 0.1f, 1000.0f));
+                m_EditorCamera.SetViewportSize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		    }
+            
             m_Framebuffer->Bind();
-            Janus::Renderer::SetClearColor({ 0.4f, 0.4f, 0.4f, 1 });
+            Janus::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1 });
             Janus::Renderer::Clear();
             m_Framebuffer->ClearAttachment(1, -1);
-            m_EditorCamera.OnUpdate(ts);
+            if (m_ViewportFocused && m_AllowViewportCameraEvents) {
+				m_EditorCamera.OnUpdate(ts);
+            }
             m_Scene->OnUpdate(ts, m_EditorCamera);
             m_Framebuffer->Unbind();
         }
@@ -77,8 +87,8 @@ class SceneEditorLayer : public Janus::Layer
 			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 		    }
             
-            if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-			window_flags |= ImGuiWindowFlags_NoBackground;
+            //if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+			//window_flags |= ImGuiWindowFlags_NoBackground;
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
            	ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
@@ -98,7 +108,51 @@ class SceneEditorLayer : public Janus::Layer
                 }
 
                 style.WindowMinSize.x = minWinSizeX;
+                
+                ImGui::Begin("Environment");
+                
+                float skyboxLod;
+                ImGui::SliderFloat("Skybox LOD", &skyboxLod, 0.0f, 11.0f);
 
+                ImGui::Columns(2);
+                ImGui::AlignTextToFramePadding();
+
+                auto& light = m_Scene->GetLight();
+                Property("Light Radiance", light.Radiance, PropertyFlag::ColorProperty);
+                Property("Light Position", light.Position, -30.0f, 30.0f, PropertyFlag::SliderProperty);
+                Property("Light Multiplier", light.Irradiance, 0.0f, 5.0f, PropertyFlag::SliderProperty);
+
+                ImGui::Columns(1);
+                ImGui::End();
+
+
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+                ImGui::Begin("Viewport");
+                
+                    m_ViewportFocused = ImGui::IsWindowFocused();
+		            m_ViewportHovered = ImGui::IsWindowHovered();
+
+		            auto viewportOffset = ImGui::GetCursorPos();
+                    auto viewportSize = ImGui::GetContentRegionAvail();
+
+		            Janus::Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
+                    uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
+                    ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+                    
+                    m_ViewportSize = { viewportSize.x, viewportSize.y };
+                    auto windowSize = ImGui::GetWindowSize();
+                    ImVec2 minBound = ImGui::GetWindowPos();
+                    minBound.x += viewportOffset.x;
+                    minBound.y += viewportOffset.y;
+
+                    ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
+                    m_ViewportBounds[0] = { minBound.x, minBound.y };
+                    m_ViewportBounds[1] = { maxBound.x, maxBound.y };
+                    m_AllowViewportCameraEvents = ImGui::IsMouseHoveringRect(minBound, maxBound);
+                ImGui::End();
+                
+                ImGui::PopStyleVar();
+                
                 if (ImGui::BeginMenuBar())
                 {
                     if (ImGui::BeginMenu("File"))
@@ -114,29 +168,119 @@ class SceneEditorLayer : public Janus::Layer
                     }
                     ImGui::EndMenuBar();
                 }
-                
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-                ImGui::Begin("Viewport");
-                    auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		            auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-		            auto viewportOffset = ImGui::GetWindowPos();
-		            m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		            m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-
-                    m_ViewportFocused = ImGui::IsWindowFocused();
-		            m_ViewportHovered = ImGui::IsWindowHovered();
-		            Janus::Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
-
-                    auto viewportPanelSize = ImGui::GetContentRegionAvail();
-                    m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-                    uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-                    ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-                ImGui::End();
-                
-                ImGui::PopStyleVar();
 
             ImGui::End();
             
+        }
+
+        bool Property(const std::string& name, bool& value)
+        {
+            ImGui::Text(name.c_str());
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(-1);
+
+            std::string id = "##" + name;
+            bool result = ImGui::Checkbox(id.c_str(), &value);
+
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+            
+            return result;
+        }
+
+        bool Property(const std::string& name, float& value, float min, float max, PropertyFlag flags)
+        {
+            ImGui::Text(name.c_str());
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(-1);
+
+            std::string id = "##" + name;
+            bool changed = false;
+            if (flags == PropertyFlag::SliderProperty)
+                changed = ImGui::SliderFloat(id.c_str(), &value, min, max);
+            else
+                changed = ImGui::DragFloat(id.c_str(), &value, 1.0f, min, max);
+
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+            
+            return changed;
+        }
+
+        bool Property(const std::string& name, glm::vec2& value, PropertyFlag flags)
+        {
+            return Property(name, value, -1.0f, 1.0f, flags);
+        }
+
+        bool Property(const std::string& name, glm::vec2& value, float min, float max, PropertyFlag flags)
+        {
+            ImGui::Text(name.c_str());
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(-1);
+
+            std::string id = "##" + name;
+            bool changed = false;
+            if (flags == PropertyFlag::SliderProperty)
+                changed = ImGui::SliderFloat2(id.c_str(), glm::value_ptr(value), min, max);
+            else
+                changed = ImGui::DragFloat2(id.c_str(), glm::value_ptr(value), 1.0f, min, max);
+
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+
+            return changed;
+        }
+
+        bool Property(const std::string& name, glm::vec3& value, PropertyFlag flags)
+        {
+            return Property(name, value, -1.0f, 1.0f, flags);
+        }
+
+        bool Property(const std::string& name, glm::vec3& value, float min, float max, PropertyFlag flags)
+        {
+            ImGui::Text(name.c_str());
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(-1);
+
+            std::string id = "##" + name;
+            bool changed = false;
+            if ((int)flags & (int)PropertyFlag::ColorProperty)
+                changed = ImGui::ColorEdit3(id.c_str(), glm::value_ptr(value), ImGuiColorEditFlags_NoInputs);
+            else if (flags == PropertyFlag::SliderProperty)
+                changed = ImGui::SliderFloat3(id.c_str(), glm::value_ptr(value), min, max);
+            else
+                changed = ImGui::DragFloat3(id.c_str(), glm::value_ptr(value), 1.0f, min, max);
+
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+
+            return changed;
+        }
+
+        bool Property(const std::string& name, glm::vec4& value, PropertyFlag flags)
+        {
+            return Property(name, value, -1.0f, 1.0f, flags);
+        }
+
+        bool Property(const std::string& name, glm::vec4& value, float min, float max, PropertyFlag flags)
+        {
+            ImGui::Text(name.c_str());
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(-1);
+
+            std::string id = "##" + name;
+            bool changed = false;
+            if ((int)flags & (int)PropertyFlag::ColorProperty)
+                changed = ImGui::ColorEdit4(id.c_str(), glm::value_ptr(value), ImGuiColorEditFlags_NoInputs);
+            else if (flags == PropertyFlag::SliderProperty)
+                changed = ImGui::SliderFloat4(id.c_str(), glm::value_ptr(value), min, max);
+            else
+                changed = ImGui::DragFloat4(id.c_str(), glm::value_ptr(value), 1.0f, min, max);
+
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+
+            return changed;
         }
 
     private:
@@ -146,6 +290,7 @@ class SceneEditorLayer : public Janus::Layer
         bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
+        bool m_AllowViewportCameraEvents;
 };
 
 class SceneEditor : public Janus::Application
@@ -153,7 +298,7 @@ class SceneEditor : public Janus::Application
     public:
         SceneEditor()
         {
-            PushLayer(new SceneEditorLayer());
+            PushLayer(new SceneSceneEditorLayer());
         }
 
         ~SceneEditor()

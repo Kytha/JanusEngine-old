@@ -80,8 +80,8 @@ namespace Janus {
 
 	void EditorCamera::OnUpdate(Timestep ts)
 	{
-		if (Input::IsKeyPressed(JN_KEY_LEFT_ALT))
-		{
+		//if (Input::IsKeyPressed(JN_KEY_LEFT_ALT))
+		//{
 			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
 			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
 			m_InitialMousePosition = mouse;
@@ -92,7 +92,7 @@ namespace Janus {
 				MouseRotate(delta);
 			else if (Input::IsMouseButtonPressed(JN_MOUSE_BUTTON_RIGHT))
 				MouseZoom(delta.y);
-		}
+		//}
 
 		UpdateCameraView();
 	}

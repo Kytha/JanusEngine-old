@@ -6,7 +6,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Janus::UI {
-
+	enum class PropertyFlag
+	{
+		None = 0, ColorProperty = 1, DragProperty = 2, SliderProperty = 4
+	};
 	static int s_UIContextID = 0;
 	static uint32_t s_Counter = 0;
 	static char s_IDBuffer[16];
@@ -131,6 +134,27 @@ namespace Janus::UI {
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::SliderInt(s_IDBuffer, &value, min, max))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+
+		return modified;
+	}
+
+	static bool PropertySlider(const char* label, float& value, int min, int max)
+	{
+		bool modified = false;
+
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderFloat(s_IDBuffer, &value, min, max))
 			modified = true;
 
 		ImGui::PopItemWidth();
