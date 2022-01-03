@@ -1,18 +1,66 @@
+
+########################### SOURCE CODE ########################################
+
 SET ( JANUS_SOURCE
-    src/Application.cpp
+    src/Core/Log.cpp
+    src/Core/Layer.cpp
+    src/Core/LayerStack.cpp
+    src/Core/Application.cpp
+    src/Core/UUID.cpp
+    src/Graphics/Shader.cpp
+    src/Graphics/Texture.cpp
+    src/Graphics/Mesh.cpp
+    src/Graphics/VertexArray.cpp
+    src/Graphics/VertexBuffer.cpp
+    src/Graphics/IndexBuffer.cpp
+    src/Graphics/ShaderLibrary.cpp
+    src/Graphics/Material.cpp
+    src/Graphics/Renderer.cpp
+    src/Scene/Entity.cpp
+    src/Scene/Camera.cpp
+    src/Scene/Scene.cpp
+    src/Core/stb_image/stb_imageBuild.cpp
+    src/Platform/Windows/WindowsWindow.cpp
+    src/Platform/Windows/WindowsInput.cpp
   )
 
 SET ( JANUS_HEADERS
-    src/Core.h
-    src/Application.h
+    src/Core/Core.h
+    src/Core/Log.h
+    src/jnpch.h
+    src/Core/Events/Event.h
+    src/Core/Events/KeyEvent.h
+    src/Core/Events/MouseEvent.h
+    src/Core/Events/ApplicationEvent.h
+    src/Core/KeyCodes.h
+    src/Core/MouseButtonCodes.h
+    src/Core/Input.h
+    src/Core/Timestep.h
+    src/Core/Layer.h
+    src/Core/LayerStack.h
+    src/Core/Window.h
+    src/Core/Application.h
+    src/Core/UUID.h
+    src/Graphics/Shader.h
+    src/Graphics/Texture.h
+    src/Graphics/Mesh.h
+    src/Graphics/VertexArray.h
+    src/Graphics/VertexBuffer.h
+    src/Graphics/IndexBuffer.h
+    src/Graphics/ShaderLibrary.h
+    src/Graphics/Material.h
+    src/Graphics/Light.h
+    src/Graphics/Renderer.h
+    src/Scene/Entity.h
+    src/Scene/Scene.h
+    src/Scene/Camera.h
+    src/Scene/Components.h
+    src/Core/stb_image/stb_image.h
+    src/Platform/Windows/WindowsWindow.h
+    src/Platform/Windows/WindowsInput.h
   )
 
-
-# Visual Studio source folders
-#SOURCE_GROUP (core REGULAR_EXPRESSION src/core/.*)
-#SOURCE_GROUP (shapes REGULAR_EXPRESSION src/shapes/.*)
-
-###########################################################################
+############################# DEPENDENCIES ###########################################
 
 ADD_LIBRARY ( janus STATIC
   ${JANUS_SOURCE}
@@ -20,13 +68,32 @@ ADD_LIBRARY ( janus STATIC
   )
 
 ADD_SUBDIRECTORY(vendors/glfw)
-TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/glfw/include)
-TARGET_LINK_LIBRARIES( janus glfw)
+ADD_SUBDIRECTORY(vendors/Glad)
+ADD_SUBDIRECTORY(vendors/glm)
+ADD_SUBDIRECTORY(vendors/spdlog)
 
-#IF (WIN32)
-  # Avoid a name clash when building on Visual Studio
-  #SET_TARGET_PROPERTIES ( janus PROPERTIES OUTPUT_NAME libjanus )
-#ENDIF()
+# Workaround to googletest using std::tr1 which is deprecated in c++17
+ADD_DEFINITIONS(-DGTEST_LANG_CXX11=1)
+
+SET(ASSIMP_BUILD_TESTS OFF CACHE BOOL "disable assimp tests" FORCE)
+SET(BUILD_SHARED_LIBS OFF CACHE BOOL "Build as static library" FORCE)
+SET(ASSIMP_BUILD_ZLIB ON CACHE BOOL "Build Zlib" FORCE)
+SET(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Disable builidng assimp tools" FORCE)
+SET(ASSIMP_INSTALL OFF CACHE BOOL "Use assimp as submodule" FORCE)
+
+ADD_SUBDIRECTORY(vendors/assimp)
+
+ADD_SUBDIRECTORY(vendors/entt)
+
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC src)
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/glfw/include)
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/glad/include)
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/glm/glm)
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/spdlog/include)
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/assimp/include)
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/entt/single_include)
+
+TARGET_LINK_LIBRARIES( janus PUBLIC glfw PUBLIC Glad PUBLIC spdlog PUBLIC glm PUBLIC assimp PUBLIC EnTT)
 
 INSTALL ( TARGETS
   janus
