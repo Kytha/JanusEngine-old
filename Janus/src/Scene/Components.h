@@ -7,7 +7,7 @@
 #include "Core/UUID.h"
 #include "Graphics/Texture.h"
 #include "Graphics/Mesh.h"
-#include "Scene/Camera.h"
+#include "Graphics/Camera.h"
 #include "Asset/Asset.h"
 
 namespace Janus {

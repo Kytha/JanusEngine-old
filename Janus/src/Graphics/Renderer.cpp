@@ -1,6 +1,6 @@
 #include "jnpch.h"
 #include "Renderer.h"
-#include "Scene/Camera.h"
+#include "Graphics/Camera.h"
 #include "Core/Application.h"
 #include "Mesh.h"
 
@@ -9,8 +9,7 @@ namespace Janus {
 
     struct SceneData
     {
-        glm::mat4 ViewProjectionMatrix;
-        glm::vec3 CameraPos;
+        SceneRendererCamera SceneCamera;
         Light Light;
     };
 
@@ -26,12 +25,13 @@ namespace Janus {
         return *s_ShaderLibrary;
     }
 
-    void Renderer::BeginScene(Scene* scene)
+    void Renderer::BeginScene(Scene* scene, const SceneRendererCamera& camera)
     {
         glEnable(GL_DEPTH_TEST);
-        Camera& camera = scene->GetCamera();
-        s_SceneData.ViewProjectionMatrix = camera.GetProjectionMatrix() * camera.GetViewMatrix();
-        s_SceneData.CameraPos = camera.GetPosition();
+        s_SceneData.SceneCamera = camera;
+        //Camera& camera = scene->GetCamera();
+        //s_SceneData.ViewProjectionMatrix = camera.GetProjectionMatrix() * camera.GetViewMatrix();
+        //s_SceneData.CameraPos = camera.GetPosition();
         s_SceneData.Light = scene->GetLight();
     }
 
@@ -39,6 +39,11 @@ namespace Janus {
     {
 
     }
+
+    void Renderer::SetClearColor(const glm::vec4& color)
+	{
+		glClearColor(color.r, color.g, color.b, color.a);
+	}
 
     void Renderer::Clear()
     {
@@ -50,16 +55,25 @@ namespace Janus {
 
     }
 
+    void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+	{
+		glViewport(0, 0, width, height);
+	}
+
     void Renderer::SubmitMesh(const Ref<Mesh>& mesh, const glm::mat4& transform, const Ref<Material>& overrideMaterial) {
         mesh->m_VertexArray->Bind();
         auto&& materials = mesh->GetMaterials();
         
+        auto& sceneCamera = s_SceneData.SceneCamera;
+        auto viewProjection = sceneCamera.Camera.GetProjectionMatrix() * sceneCamera.ViewMatrix;
+		glm::vec3 cameraPosition = glm::inverse(s_SceneData.SceneCamera.ViewMatrix)[3];
+
         for (Submesh& submesh : mesh->m_Submeshes)
         {
             // Material
             auto material = overrideMaterial ? overrideMaterial : materials[submesh.MaterialIndex];
-            material->SetViewProjection(s_SceneData.ViewProjectionMatrix);
-            material->SetView(s_SceneData.CameraPos);
+            material->SetViewProjection(viewProjection);
+            material->SetView(cameraPosition);
             auto shader = material->GetShader();
             material->Set(s_SceneData.Light);
             material->Bind();

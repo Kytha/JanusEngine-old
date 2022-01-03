@@ -23,14 +23,11 @@ namespace Janus {
 
     }
 
-    void Scene::OnUpdate(Timestep ts)
+    void Scene::OnUpdate(Timestep ts, EditorCamera& editorCamera)
     {
         glEnable(GL_DEPTH_TEST);
-        m_Camera.Update(ts);
-        auto viewProjection = m_Camera.GetProjectionMatrix() * m_Camera.GetViewMatrix();
         // Render entities
-        Renderer::BeginScene(this);
-        Renderer::Clear();
+        Renderer::BeginScene(this, { editorCamera, editorCamera.GetViewMatrix(), 0.1f, 1000.0f, 45.0f });
         for (auto entity : m_Entities)
         {
             auto mesh = entity->GetMesh();

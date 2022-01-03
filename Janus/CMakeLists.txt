@@ -13,15 +13,20 @@ SET ( JANUS_SOURCE
     src/Graphics/VertexArray.cpp
     src/Graphics/VertexBuffer.cpp
     src/Graphics/IndexBuffer.cpp
+    src/Graphics/FrameBuffer.cpp
+    src/Graphics/OpenGLFrameBuffer.cpp
     src/Graphics/ShaderLibrary.cpp
     src/Graphics/Material.cpp
     src/Graphics/Renderer.cpp
+    src/Graphics/Camera.cpp
     src/Scene/Entity.cpp
-    src/Scene/Camera.cpp
+    src/Scene/EditorCamera.cpp
     src/Scene/Scene.cpp
     src/Core/stb_image/stb_imageBuild.cpp
     src/Platform/Windows/WindowsWindow.cpp
     src/Platform/Windows/WindowsInput.cpp
+    src/ImGui/ImGuiBuild.cpp
+    src/ImGui/ImGuiLayer.cpp
   )
 
 SET ( JANUS_HEADERS
@@ -47,17 +52,22 @@ SET ( JANUS_HEADERS
     src/Graphics/VertexArray.h
     src/Graphics/VertexBuffer.h
     src/Graphics/IndexBuffer.h
+    src/Graphics/FrameBuffer.h
+    src/Graphics/OpenGLFrameBuffer.h
     src/Graphics/ShaderLibrary.h
     src/Graphics/Material.h
     src/Graphics/Light.h
     src/Graphics/Renderer.h
+    src/Graphics/Camera.h
     src/Scene/Entity.h
     src/Scene/Scene.h
-    src/Scene/Camera.h
+    src/Scene/EditorCamera.h
     src/Scene/Components.h
     src/Core/stb_image/stb_image.h
     src/Platform/Windows/WindowsWindow.h
     src/Platform/Windows/WindowsInput.h
+    src/ImGui/ImGuiLayer.h
+    src/ImGui/ImGui.h
   )
 
 ############################# DEPENDENCIES ###########################################
@@ -84,6 +94,7 @@ SET(ASSIMP_INSTALL OFF CACHE BOOL "Use assimp as submodule" FORCE)
 ADD_SUBDIRECTORY(vendors/assimp)
 
 ADD_SUBDIRECTORY(vendors/entt)
+ADD_SUBDIRECTORY(vendors/imgui)
 
 TARGET_INCLUDE_DIRECTORIES( janus PUBLIC src)
 TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/glfw/include)
@@ -91,9 +102,11 @@ TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/glad/include)
 TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/glm/glm)
 TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/spdlog/include)
 TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/assimp/include)
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/imgui)
+TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/imgui/backends)
 TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/entt/single_include)
 
-TARGET_LINK_LIBRARIES( janus PUBLIC glfw PUBLIC Glad PUBLIC spdlog PUBLIC glm PUBLIC assimp PUBLIC EnTT)
+TARGET_LINK_LIBRARIES( janus PUBLIC glfw PUBLIC Glad PUBLIC spdlog PUBLIC glm PUBLIC assimp PUBLIC EnTT PUBLIC imgui)
 
 INSTALL ( TARGETS
   janus

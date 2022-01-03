@@ -27,7 +27,6 @@
 
 #define BIT(x) (1 << x)
 
-#define JN_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
 static const float Pi      = 3.14159265358979323846f;
 static const float InvPi   = 0.31830988618379067154f;

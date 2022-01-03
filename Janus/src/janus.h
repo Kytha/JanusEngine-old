@@ -22,12 +22,15 @@
 #include "Graphics/VertexBuffer.h"
 #include "Graphics/IndexBuffer.h"
 #include "Graphics/VertexArray.h"
+#include "Graphics/Framebuffer.h"
 #include "Graphics/Light.h"
+#include "Graphics/Camera.h"
 
 #include "Scene/Entity.h"
-#include "Scene/Camera.h"
+#include "Scene/EditorCamera.h"
 #include "Scene/Scene.h"
 #include "Scene/Components.h"
 
+#include "ImGui/ImGui.h"
 
 #include "Core/EntryPoint.h"

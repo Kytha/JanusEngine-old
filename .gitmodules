@@ -13,3 +13,7 @@
 [submodule "Janus/vendors/entt"]
 	path = Janus/vendors/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "Janus/vendors/imgui"]
+	path = Janus/vendors/imgui
+	url = https://github.com/Kytha/imgui.git
+	branch = docking
