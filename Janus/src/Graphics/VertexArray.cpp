@@ -2,6 +2,7 @@
 #include "VertexBuffer.h"
 #include <glad/glad.h>
 #include "jnpch.h"
+#include "Renderer.h"
 // Helper function which will convert from custom shader data types to appropriate GL types
 namespace Janus {
     static GLenum ShaderDataTypeToOpenGlBaseType(ShaderDataType type)
@@ -36,46 +37,61 @@ namespace Janus {
 
     VertexArray::VertexArray()
     {
-        glCreateVertexArrays(1, &m_RendererID);
+        Ref<VertexArray> instance = this;
+        Renderer::Submit([instance]() mutable 
+        {
+            glCreateVertexArrays(1, &(instance->m_RendererID));
+        });
+        
     }
 
     void VertexArray::Bind()
     {
-        glBindVertexArray(m_RendererID);
+        Ref<VertexArray> instance = this;
+        Renderer::Submit([instance]() mutable 
+        {
+            glBindVertexArray(instance->m_RendererID);
+        });
     }
 
     void VertexArray::Unbind()
     {
-        glBindVertexArray(0);
+        Ref<VertexArray> instance = this;
+        Renderer::Submit([instance]() mutable 
+        {
+           glBindVertexArray(0);
+        });
     }
 
-    void VertexArray::AddVertexBuffer(const Ref<VertexBuffer> &vertexBuffer)
+    void VertexArray::AddVertexBuffer(Ref<VertexBuffer> vertexBuffer)
     {
-        if (!vertexBuffer->GetLayout().GetElements().size())
-            std::cout << "VertexBuffer has no layout!";
-        glBindVertexArray(m_RendererID);
-        vertexBuffer->Bind();
-        uint32_t index = 0;
-        const auto &layout = vertexBuffer->GetLayout();
-
-        // Auto layout mapping
-        for (const auto &element : layout)
+        Ref<VertexArray> instance = this;
+        Renderer::Submit([instance, vertexBuffer]() mutable 
         {
-            glEnableVertexAttribArray(index);
-            glVertexAttribPointer(index,
-                                element.GetComponentCount(),
-                                ShaderDataTypeToOpenGlBaseType(element.Type),
-                                element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(),
-                                (const uint32_t *)element.Offset);
-            index++;
-        }
-        m_VertexBuffers.push_back(vertexBuffer);
+            if (!vertexBuffer->GetLayout().GetElements().size())
+                std::cout << "VertexBuffer has no layout!";
+            glBindVertexArray(instance->m_RendererID);
+            vertexBuffer->Bind();
+            uint32_t index = 0;
+            const auto &layout = vertexBuffer->GetLayout();
+
+            // Auto layout mapping
+            for (const auto &element : layout)
+            {
+                glEnableVertexAttribArray(index);
+                glVertexAttribPointer(index,
+                                    element.GetComponentCount(),
+                                    ShaderDataTypeToOpenGlBaseType(element.Type),
+                                    element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(),
+                                    (const uint32_t *)element.Offset);
+                index++;
+            }
+            instance->m_VertexBuffers.push_back(vertexBuffer);
+        });
     }
 
     void VertexArray::SetIndexBuffer(const Ref<IndexBuffer> &indexBuffer)
     {
-        glBindVertexArray(m_RendererID);
-        indexBuffer->Bind();
         m_IndexBuffer = indexBuffer;
     }
 

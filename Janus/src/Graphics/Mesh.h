@@ -9,6 +9,8 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Material.h"
+#include "Graphics/Pipeline.h"
+#include "ShaderLibrary.h"
 //#include "AABB.h"
 struct aiNode;
 struct aiAnimation;
@@ -50,7 +52,7 @@ namespace Janus {
         //AABB BoundingBox;
     };
 
-    class Mesh
+    class Mesh : public RefCounted
     {
     public:
         Mesh(const std::string& filename);
@@ -60,8 +62,8 @@ namespace Janus {
         void DumpVertexBuffer();
 
         Ref<Shader> GetMeshShader() { return m_MeshShader; }
-        Ref<Material> GetMaterial() { return m_BaseMaterial; }
-        std::vector<Ref<Material>> GetMaterials() { return m_Materials; }
+		Ref<Material> GetMaterial() { return m_BaseMaterial; }
+		const std::vector<Ref<MaterialInstance>> GetMaterials() { return m_Materials; }
         const std::vector<Ref<Texture>>& GetTextures() const { return m_Textures; }
         const std::string& GetFilePath() const { return m_FilePath; }
         std::vector<Submesh> m_Submeshes;
@@ -73,7 +75,9 @@ namespace Janus {
 
         glm::mat4 m_InverseTransform;
 
-        Ref<VertexArray> m_VertexArray;
+        Ref<Pipeline> m_Pipeline;
+		Ref<VertexBuffer> m_VertexBuffer;
+		Ref<IndexBuffer> m_IndexBuffer;
         Ref<Shader> m_MeshShader;
         std::vector<Vertex> m_Vertices;
         std::vector<Index> m_Indices;
@@ -83,7 +87,7 @@ namespace Janus {
         Ref<Material> m_BaseMaterial;
         std::vector<Ref<Texture>> m_Textures;
         std::vector<Ref<Texture>> m_NormalMaps;
-        std::vector<Ref<Material>> m_Materials;
+        std::vector<Ref<MaterialInstance>> m_Materials;
 
         std::string m_FilePath;
 

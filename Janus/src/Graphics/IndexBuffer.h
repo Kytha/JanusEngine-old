@@ -3,7 +3,7 @@
 #include "Core/Buffer.h"
 
 namespace Janus {
-    class IndexBuffer
+    class IndexBuffer : public RefCounted
     {
     public:
         IndexBuffer(void *indices, uint32_t size);

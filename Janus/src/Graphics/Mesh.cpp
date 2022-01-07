@@ -49,11 +49,11 @@ namespace Janus {
 
         const aiScene* scene = m_Importer->ReadFile(filename, s_MeshImportFlags);
         if (!scene || !scene->HasMeshes()) {
-            JN_ASSERT(false, "Mesh Import Error: Scene has no meshes");
+            JN_ASSERT(false, "ERROR::MESH:: Scene has no meshes");
         }
 
-        m_MeshShader = Renderer::GetShaderLibrary().Get("janus_pbr");
-        m_BaseMaterial = CreateRef<Material>(m_MeshShader);
+        m_MeshShader = Renderer::GetShaderLibrary()->Get("janus_pbr");
+        m_BaseMaterial = Material::Create(m_MeshShader);
 
         m_InverseTransform = glm::inverse(Mat4FromAssimpMat4(scene->mRootNode->mTransformation));
 
@@ -61,10 +61,8 @@ namespace Janus {
         uint32_t indexCount = 0;
 
         m_Submeshes.reserve(scene->mNumMeshes);
-        std::cout << "FOUND = " << scene->mNumMeshes << " MESHES" << std::endl;
         for (size_t m = 0; m < scene->mNumMeshes; m++)
         {
-            std::cout << std::endl << std::endl;
             aiMesh* mesh = scene->mMeshes[m];
 
             Submesh& submesh = m_Submeshes.emplace_back();
@@ -72,7 +70,6 @@ namespace Janus {
             submesh.BaseIndex = indexCount;
             submesh.MaterialIndex = mesh->mMaterialIndex;
             submesh.IndexCount = mesh->mNumFaces * 3;
-            std::cout << "Mesh: " << mesh->mName.C_Str() << " references Material: " << mesh->mMaterialIndex << std::endl;
 
             vertexCount += mesh->mNumVertices;
             indexCount += submesh.IndexCount;
@@ -124,22 +121,19 @@ namespace Janus {
         // Materials
         if (scene->HasMaterials())
         {
-            std::cout << "FOUND = " << scene->mNumMaterials << " MATERIALS" << std::endl;
             m_Textures.resize(scene->mNumMaterials);
             m_Materials.resize(scene->mNumMaterials);
             for (uint32_t i = 0; i < scene->mNumMaterials; i++)
             {
-                std::cout << std::endl << std::endl;
                 auto aiMaterial = scene->mMaterials[i];
                 auto aiMaterialName = aiMaterial->GetName();
 
-                auto mi = CreateRef<Material>(m_MeshShader);
+                auto mi = Ref<MaterialInstance>::Create(m_BaseMaterial,aiMaterialName.data);
+                mi->SetFlag(MaterialFlag::TwoSided, false);
                 m_Materials[i] = mi;
 
-                std::cout << "Material Name = " << aiMaterialName.data << std::endl << std::endl;
                 aiString aiTexPath;
                 uint32_t textureCount = aiMaterial->GetTextureCount(aiTextureType_DIFFUSE);
-                std::cout << "TextureCount = " << textureCount << std::endl;
 
                 aiColor3D aiColor;
                 aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor);
@@ -160,24 +154,20 @@ namespace Janus {
                     auto parentPath = path.parent_path();
                     parentPath /= std::string(aiTexPath.data);
                     std::string texturePath = parentPath.string();
-                    std::cout << "Albedo Texture Found @ " << texturePath << std::endl;
-                    auto texture = CreateRef<Texture>(texturePath);
+                    auto texture = Ref<Texture>::Create(texturePath);
                     if (texture->Loaded())
                     {
                         m_Textures[i] = texture;
                         mi->Set("u_AlbedoTexture", m_Textures[i]);
-                        //mi->Set("u_AlbedoTexToggle", 1.0f);
+                        mi->Set("u_AlbedoTexToggle", 1.0f);
                     }
                     else
                     {
-                        std::cout << "Failed to load albedo" << std::endl;
                         mi->Set("u_AlbedoColor", glm::vec3{ aiColor.r, aiColor.g, aiColor.b });
                     }
                 }
                 else
                 {
-                    std::cout << "No albedo" << std::endl;
-                    mi->Set("u_AlbedoTexToggle", 1.0f);
                     mi->Set("u_AlbedoColor", glm::vec3 { aiColor.r, aiColor.g, aiColor.b });
                 }
 
@@ -190,77 +180,46 @@ namespace Janus {
                     auto parentPath = path.parent_path();
                     parentPath /= std::string(aiTexPath.data);
                     std::string texturePath = parentPath.string();
-                    std::cout << "Normal Texture Found @ " << texturePath << std::endl;
-                    auto texture = CreateRef<Texture>(texturePath);
+                    auto texture = Ref<Texture>::Create(texturePath);
                     if (texture->Loaded())
                     {
                         mi->Set("u_NormalTexture", texture);
+                        mi->Set("u_NormalTexToggle", 1.0f);
                     }
                     else
                     {
-                        std::cout << "Failed to load normal" << std::endl;
+                        JN_CORE_ERROR("Could not load texture: {0}", texturePath);
                     }
                 }
                 else
                 {
-                    std::cout << "No normal" << std::endl;
+                    JN_CORE_WARN("No normal map");
                 }
 
 
 
                 if (aiMaterial->GetTexture(aiTextureType_SHININESS, 0, &aiTexPath) == AI_SUCCESS)
                 {
-                    // TODO: Temp - this should be handled by Hazel's filesystem
                     std::filesystem::path path = filename;
                     auto parentPath = path.parent_path();
                     parentPath /= std::string(aiTexPath.data);
                     std::string texturePath = parentPath.string();
-                    std::cout << "Roughness Texture Found @ " << texturePath << std::endl;
-                    auto texture = CreateRef<Texture>(texturePath);
+                    auto texture = Ref<Texture>::Create(texturePath);
                     if (texture->Loaded())
                     {
                         mi->Set("u_RoughnessTexture", texture);
+                        mi->Set("u_RoughnessTexToggle", 1.0f);
                     }
                     else
                     {
-                        std::cout << "Failed to load roughness" << std::endl;
+                       JN_CORE_ERROR("Could not load texture: {0}", texturePath);
                     }
                 }
-                else if (aiMaterial->GetTexture(AI_MATKEY_ROUGHNESS_TEXTURE, &aiTexPath) == AI_SUCCESS) 
-                {
-                    std::filesystem::path path = filename;
-                    auto parentPath = path.parent_path();
-                    parentPath /= std::string(aiTexPath.data);
-                    std::string texturePath = parentPath.string();
-                    std::cout << "Roughness Texture Found @ " << texturePath << std::endl;
-                    auto texture = CreateRef<Texture>(texturePath);
-                    if (texture->Loaded())
-                    {
-                        mi->Set("u_RoughnessTexture", texture);
-                    }
-                    else
-                    {
-                        std::cout << "Failed to load roughness" << std::endl;
-                    }
-                } else
-                {
-                    std::cout << "No roughness" << std::endl;
-                    mi->Set("u_Roughness", roughness);
-                }
-
-                std::cout << "Attempting to find metalness" << std::endl;
                 bool metalnessTextureFound = false;
                 for (uint32_t i = 0; i < aiMaterial->mNumProperties; i++)
                 {
                     auto prop = aiMaterial->mProperties[i];
-
-                    JN_CORE_TRACE("Material Property:");
-					JN_CORE_TRACE("  Name = {0}", prop->mKey.data);
-					// JN_CORE_TRACE("  Type = {0}", prop->mType);
-					// JN_CORE_TRACE("  Size = {0}", prop->mDataLength);
-					float data = *(float*)prop->mData;
-					JN_CORE_TRACE("  Value = {0}", data);
-
+#if 0
 					switch (prop->mSemantic)
 					{
 					case aiTextureType_NONE:
@@ -303,7 +262,7 @@ namespace Janus {
 						JN_CORE_TRACE("  Semantic = aiTextureType_UNKNOWN");
 						break;
 					}
-
+#endif
                     //std::cout << "Material Property: " << std::endl;
                     //std::cout << "Name = " << prop->mKey.data << std::endl << std::endl;
                     if (prop->mType == aiPTI_String) {
@@ -314,23 +273,21 @@ namespace Janus {
                         if (key == "$raw.ReflectionFactor|file")
                         {
                             metalnessTextureFound = true;
-
-                            // TODO: Temp - this should be handled by Hazel's filesystem
                             std::filesystem::path path = filename;
                             auto parentPath = path.parent_path();
                             parentPath /= str;
                             std::string texturePath = parentPath.string();
-                            auto texture = CreateRef<Texture>(texturePath);
-                            std::cout << "Metalness Texture Found @ " << texturePath << std::endl;
+                            auto texture = Ref<Texture>::Create(texturePath);
                             if (texture->Loaded())
                             {
                                 mi->Set("u_MetalnessTexture", texture);
+                                mi->Set("u_MetalnessTexToggle", 1.0f);
                             }
                             else
                             {
-                                std::cout << "Failed to load metalness" << std::endl;
+                                JN_CORE_ERROR("Could not load texture: {0}", texturePath);
                                 mi->Set("u_Metalness", metalness);
-                                mi->Set("u_MetalnessTexToggle", 1.0f);
+                                mi->Set("u_MetalnessTexToggle", 0.0f);
                             }
                             break;
                         }
@@ -339,28 +296,31 @@ namespace Janus {
                 
                 if (!metalnessTextureFound)
                 {
-                std::cout << "No metalness texture" << std::endl;
+                    JN_CORE_WARN("No metalness map");
                     mi->Set("u_Metalness", metalness);
-                    mi->Set("u_MetalnessTexToggle", 1.0f);
+                    mi->Set("u_MetalnessTexToggle", 0.0f);
                 }
             }
         }
         
-        m_VertexArray = std::make_shared<VertexArray>();
 
-        auto vb = std::make_shared<VertexBuffer>(m_Vertices.data(), static_cast<uint32_t>(m_Vertices.size() * sizeof(Vertex)));
-        vb->SetLayout({
+        m_VertexBuffer = Ref<VertexBuffer>::Create(m_Vertices.data(), static_cast<uint32_t>(m_Vertices.size() * sizeof(Vertex)));
+
+        BufferLayout vertexLayout = {
             { ShaderDataType::Float3, "a_Position" },
             { ShaderDataType::Float3, "a_Normal" },
             { ShaderDataType::Float3, "a_Tangent" },
             { ShaderDataType::Float3, "a_Binormal" },
             { ShaderDataType::Float2, "a_TexCoord" },
-        });
-        m_VertexArray->AddVertexBuffer(vb);
-        
+        };
 
-        auto ib = std::make_shared<IndexBuffer>(m_Indices.data(), static_cast<uint32_t>(m_Indices.size() * sizeof(Index)));
-        m_VertexArray->SetIndexBuffer(ib);
+        m_VertexBuffer->SetLayout(vertexLayout);
+        m_IndexBuffer = Ref<IndexBuffer>::Create(m_Indices.data(), static_cast<uint32_t>(m_Indices.size() * sizeof(Index)));
+
+        PipelineSpecification pipelineSpecification;
+		pipelineSpecification.Layout = vertexLayout;
+		m_Pipeline = Ref<Pipeline>::Create(pipelineSpecification);
+
         m_Scene = scene;
     }
 

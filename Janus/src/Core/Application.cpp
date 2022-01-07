@@ -19,6 +19,7 @@ namespace Janus {
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 		Renderer::Init();
+		Renderer::WaitAndRender();
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 	}
@@ -53,12 +54,10 @@ namespace Janus {
 			// Update all layers
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate(timestep);
-
-			m_ImGuiLayer->Begin();
-			for (Layer* layer : m_LayerStack)
-				layer->OnImGuiRender();
-			m_ImGuiLayer ->End();
-
+			
+			Application* app = this;
+				Renderer::Submit([app]() { app->RenderImGui(); });
+			Renderer::WaitAndRender();	
 			m_Window->OnUpdate();
 		}
 	}
@@ -88,15 +87,30 @@ namespace Janus {
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
-		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		int width = e.GetWidth(), height = e.GetHeight();
+		if (width == 0 || height == 0)
 		{
 			m_Minimized = true;
 			return false;
 		}
 
 		m_Minimized = false;
-		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		Renderer::Submit([=]() { glViewport(0, 0, width, height); });
+		auto& fbs = FramebufferPool::GetGlobal()->GetAll();
+		for (auto& fb : fbs)
+		{
+			fb->Resize(width, height);
+		}
 
 		return false;
 	}
+
+	void Application::RenderImGui()
+	{
+		m_ImGuiLayer->Begin();
+		for (Layer* layer : m_LayerStack)
+			layer->OnImGuiRender();
+		m_ImGuiLayer ->End();
+	}
+
 }

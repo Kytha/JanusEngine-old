@@ -1,7 +1,7 @@
 
 #include "VertexBuffer.h"
 #include <glad/glad.h>
-
+#include "Renderer.h"
 namespace Janus {
     GLenum VertexBuffer::Usage(VertexBufferUsage usage)
     {
@@ -15,30 +15,46 @@ namespace Janus {
 
     VertexBuffer::VertexBuffer(uint32_t size, VertexBufferUsage usage) : m_Size(size), m_Usage(usage)
     {
-        glCreateBuffers(1, &m_RendererID);
-        glNamedBufferData(m_RendererID, m_Size, nullptr, Usage(m_Usage));
+        Ref<VertexBuffer> instance = this;
+        Renderer::Submit([instance]() mutable
+		{
+            glCreateBuffers(1, &instance->m_RendererID);
+            glNamedBufferData(instance->m_RendererID, instance->m_Size, nullptr, Usage(instance->m_Usage));
+        });
     }
 
-    VertexBuffer::VertexBuffer(void *vertices, uint32_t size)
+    VertexBuffer::VertexBuffer(void *vertices, uint32_t size) : m_Size(size), m_Usage(VertexBufferUsage::Static)
     {
-        glCreateBuffers(1, &m_RendererID);
-        glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-        glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+        m_LocalData = Buffer::Copy(vertices, size);
+        Ref<VertexBuffer> instance = this;
+        Renderer::Submit([instance]() mutable {
+            glCreateBuffers(1, &instance->m_RendererID);
+            glNamedBufferData(instance->m_RendererID, instance->m_Size, instance->m_LocalData.Data, Usage(instance->m_Usage));
+        });
     }
 
     VertexBuffer::~VertexBuffer()
     {
-        glDeleteBuffers(1, &m_RendererID);
+        GLuint rendererID = m_RendererID;
+        Renderer::Submit([rendererID]() {
+            glDeleteBuffers(1, &rendererID);
+        });
     }
 
     void VertexBuffer::Bind()
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+        Ref<const VertexBuffer> instance = this;
+        Renderer::Submit([instance]() {
+            glBindBuffer(GL_ARRAY_BUFFER, instance->m_RendererID);
+        });
     }
 
     void VertexBuffer::Unbind()
     {
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        Ref<const VertexBuffer> instance = this;
+        Renderer::Submit([instance]() {
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        });
     }
 
     const BufferLayout &VertexBuffer::GetLayout()
@@ -56,6 +72,9 @@ namespace Janus {
     {
         m_LocalData = Buffer::Copy(data, size);
         m_Size = size;
-        glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+        Ref<VertexBuffer> instance = this;
+		Renderer::Submit([instance, offset]() {
+            glNamedBufferSubData(instance->m_RendererID, offset, instance->m_LocalData.Size, instance->m_LocalData.Data);
+        });
     }
 }

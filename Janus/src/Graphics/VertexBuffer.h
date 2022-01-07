@@ -137,7 +137,7 @@ namespace Janus {
 
     // Abstraction for OpenGL Vertex Buffer. Suppots custom layouts
 
-    class VertexBuffer
+    class VertexBuffer : public RefCounted
     {
     public:
         enum class VertexBufferUsage

@@ -16,10 +16,10 @@ class SceneSceneEditorLayer : public Janus::Layer
         SceneSceneEditorLayer()
             : Layer("Scene Editor"), m_EditorCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f))
         { 
-            m_Scene = Janus::CreateRef<Janus::Scene>("Test Scene");
-            Janus::Entity* camera = m_Scene->CreateEntity();
-            auto mesh = Janus::CreateRef<Janus::Mesh>("./assets/marble_bust_01_4k.gltf");
-            camera->SetMesh(mesh);
+            m_Scene = Janus::Ref<Janus::Scene>::Create("Test Scene");
+            Janus::Entity* bust = m_Scene->CreateEntity();
+            auto mesh = Janus::Ref<Janus::Mesh>::Create("./assets/marble_bust_01_4k.gltf");
+            bust->SetMesh(mesh);
 
             Janus::Light light;
             light.Position = {1.0f, 5.0f, 0.0f};
@@ -31,34 +31,24 @@ class SceneSceneEditorLayer : public Janus::Layer
 
         void OnAttach()
         {
-            Janus::FramebufferSpecification fbSpec;
-            fbSpec.Attachments = { Janus::FramebufferTextureFormat::RGBA8, Janus::FramebufferTextureFormat::RED_INTEGER, Janus::FramebufferTextureFormat::Depth };
-		    fbSpec.Width = 1280;
-		    fbSpec.Height = 720;
-		    m_Framebuffer = Janus::Framebuffer::Create(fbSpec);
 
         }
+
         void OnUpdate(Janus::Timestep ts) override
         {
-            if (Janus::FramebufferSpecification spec = m_Framebuffer->GetSpecification();
-			    m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
+            if (Janus::FramebufferSpecification spec = (Janus::SceneRenderer::GetFinalColorBuffer())->GetSpecification();
+			    m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && 
 			    (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		    {
-			    m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-                Janus::Renderer::OnWindowResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-                m_EditorCamera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), m_ViewportSize.x, m_ViewportSize.y, 0.1f, 1000.0f));
+                Janus::SceneRenderer::SetViewportSize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
                 m_EditorCamera.SetViewportSize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+                m_EditorCamera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), m_ViewportSize.x, m_ViewportSize.y, 0.1f, 1000.0f));
 		    }
             
-            m_Framebuffer->Bind();
-            Janus::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1 });
-            Janus::Renderer::Clear();
-            m_Framebuffer->ClearAttachment(1, -1);
             if (m_ViewportFocused && m_AllowViewportCameraEvents) {
 				m_EditorCamera.OnUpdate(ts);
             }
             m_Scene->OnUpdate(ts, m_EditorCamera);
-            m_Framebuffer->Unbind();
         }
 
         void OnEvent(Janus::Event& e) 
@@ -136,8 +126,8 @@ class SceneSceneEditorLayer : public Janus::Layer
                     auto viewportSize = ImGui::GetContentRegionAvail();
 
 		            Janus::Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
-                    uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-                    ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+                    
+                    ImGui::Image((void*)Janus::SceneRenderer::GetFinalColorBufferRendererID(), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                     
                     m_ViewportSize = { viewportSize.x, viewportSize.y };
                     auto windowSize = ImGui::GetWindowSize();
@@ -286,7 +276,6 @@ class SceneSceneEditorLayer : public Janus::Layer
     private:
         Janus::Ref<Janus::Scene> m_Scene;
         Janus::EditorCamera m_EditorCamera;
-        Janus::Ref<Janus::Framebuffer> m_Framebuffer;
         bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];

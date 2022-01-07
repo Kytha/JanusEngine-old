@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Core/Input.h"
 #include "Scene.h"
-#include "Graphics/Renderer.h"
+#include "Graphics/SceneRenderer.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -27,16 +27,16 @@ namespace Janus {
     {
         glEnable(GL_DEPTH_TEST);
         // Render entities
-        Renderer::BeginScene(this, { editorCamera, editorCamera.GetViewMatrix(), 0.1f, 1000.0f, 45.0f });
+        SceneRenderer::BeginScene(this, { editorCamera, editorCamera.GetViewMatrix(), 0.1f, 1000.0f, 45.0f });
         for (auto entity : m_Entities)
         {
             auto mesh = entity->GetMesh();
             if (mesh) {
-                Ref<Material> overrideMaterial = nullptr;
-                 Renderer::SubmitMesh(mesh, entity->GetTransform(), overrideMaterial);
+                Ref<MaterialInstance> overrideMaterial = nullptr;
+                 SceneRenderer::SubmitMesh(mesh, entity->GetTransform(), overrideMaterial);
             }
         }
-        Renderer::EndScene();
+        SceneRenderer::EndScene();
     }
 
     void Scene::AddEntity(Entity* entity)

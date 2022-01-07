@@ -1,9 +1,11 @@
+#pragma once
+
 #include "jnpch.h"
 #include "Core/Core.h"
 #include "Shader.h"
 
 namespace Janus {
-    class ShaderLibrary
+    class ShaderLibrary : public RefCounted
     {
     public:
         ShaderLibrary();

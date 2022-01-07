@@ -7,7 +7,7 @@
 #include <string>
 
 namespace Janus {
-    class Scene
+    class Scene : public RefCounted
     {
     public:
         Scene(const std::string& debugName = "Scene");
@@ -21,9 +21,9 @@ namespace Janus {
         inline Light& GetLight() { return m_Light; }
         void AddEntity(Entity* entity);
         Entity* CreateEntity();
+        Light m_Light;
     private:
         std::string m_DebugName;
-        Light m_Light;
         std::vector<Entity*> m_Entities;
         float m_LightMultiplier = 0.3f;
     };

@@ -4,7 +4,7 @@
 
 namespace Janus {
 
-	class Camera
+	class Camera : public RefCounted
 	{
 	public:
 		Camera() = default;

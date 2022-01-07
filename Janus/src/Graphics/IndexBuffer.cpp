@@ -1,28 +1,41 @@
 #include "jnpch.h"
 #include "IndexBuffer.h"
 #include <glad/glad.h>
+#include "Renderer.h"
 
 namespace Janus {
     IndexBuffer::IndexBuffer(void *indices, uint32_t size)
         : m_Size(size)
     {
-        glCreateBuffers(1, &m_RendererID);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
+        m_LocalData = Buffer::Copy(indices, size);
+        Ref<IndexBuffer> instance = this;
+		Renderer::Submit([instance]() mutable {
+            glCreateBuffers(1, &instance->m_RendererID);
+            glBufferData(instance->m_RendererID, instance->m_Size, instance->m_LocalData.Data, GL_STATIC_DRAW);
+        });
     }
 
     IndexBuffer::~IndexBuffer()
     {
-        glDeleteBuffers(1, &m_RendererID);
+		GLuint rendererID = m_RendererID;
+		Renderer::Submit([rendererID]() {
+			glDeleteBuffers(1, &rendererID);
+		});
     }
 
     void IndexBuffer::Bind()
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+		Ref<IndexBuffer> instance = this;
+		Renderer::Submit([instance]() {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, instance->m_RendererID);
+		});
     }
 
     void IndexBuffer::Unbind()
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        Ref<IndexBuffer> instance = this;
+		Renderer::Submit([instance]() {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		});
     }
 }

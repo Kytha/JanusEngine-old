@@ -8,6 +8,7 @@ SET ( JANUS_SOURCE
     src/Core/Application.cpp
     src/Core/UUID.cpp
     src/Graphics/Shader.cpp
+    src/Graphics/ShaderUniform.cpp
     src/Graphics/Texture.cpp
     src/Graphics/Mesh.cpp
     src/Graphics/VertexArray.cpp
@@ -18,6 +19,10 @@ SET ( JANUS_SOURCE
     src/Graphics/ShaderLibrary.cpp
     src/Graphics/Material.cpp
     src/Graphics/Renderer.cpp
+    src/Graphics/Pipeline.cpp
+    src/Graphics/RenderPass.cpp
+    src/Graphics/RenderCommandQueue.cpp
+    src/Graphics/SceneRenderer.cpp
     src/Graphics/Camera.cpp
     src/Scene/Entity.cpp
     src/Scene/EditorCamera.cpp
@@ -47,6 +52,7 @@ SET ( JANUS_HEADERS
     src/Core/Application.h
     src/Core/UUID.h
     src/Graphics/Shader.h
+    src/Graphics/ShaderUniform.h
     src/Graphics/Texture.h
     src/Graphics/Mesh.h
     src/Graphics/VertexArray.h
@@ -58,6 +64,10 @@ SET ( JANUS_HEADERS
     src/Graphics/Material.h
     src/Graphics/Light.h
     src/Graphics/Renderer.h
+    src/Graphics/Pipeline.h
+    src/Graphics/RenderPass.h
+    src/Graphics/SceneRenderer.h
+    src/Graphics/RenderCommandQueue.h
     src/Graphics/Camera.h
     src/Scene/Entity.h
     src/Scene/Scene.h

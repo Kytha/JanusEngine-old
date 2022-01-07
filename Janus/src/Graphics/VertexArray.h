@@ -3,7 +3,7 @@
 #include "IndexBuffer.h"
 
 namespace Janus {
-    class VertexArray
+    class VertexArray : public RefCounted
     {
     public:
         VertexArray();
@@ -12,7 +12,7 @@ namespace Janus {
         void Bind();
         void Unbind();
 
-        void AddVertexBuffer(const Ref<VertexBuffer> &vertexBuffer);
+        void AddVertexBuffer(Ref<VertexBuffer> vertexBuffer);
         void SetIndexBuffer(const Ref<IndexBuffer> &indexBuffer);
 
         const std::vector<Ref<VertexBuffer>> &GetVertexBuffers();

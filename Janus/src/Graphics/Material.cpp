@@ -2,64 +2,190 @@
 #include "Light.h"
 
 namespace Janus {
-    Material::Material(Ref<Shader> shader) : m_Shader(shader)
+
+	Ref<Material> Material::Create(const Ref<Shader>& shader)
+	{
+		return Ref<Material>::Create(shader);
+	}
+
+    Material::Material(const Ref<Shader>& shader) : m_Shader(shader)
     {
-        metalness = 0.5f;
+        AllocateStorage();
+        m_MaterialFlags |= (uint32_t)MaterialFlag::DepthTest;
+		m_MaterialFlags |= (uint32_t)MaterialFlag::Blend;
     }
 
-    void Material::Set(const std::string &name, Ref<Texture> texture)
+    void Material::AllocateStorage()
     {
-        // Find where the texture is located and upload location and size info to shader
-        m_Textures.push_back(texture);
-        int32_t location = m_Shader->GetUniformLocation(name);
-        glUniform1i(location, 0);
-        m_Shader->Bind();
-        m_Shader->UploadUniformInt(location, static_cast<uint32_t>(m_Textures.size() - 1));
-    }
-
-    void Material::Set(const std::string &name, float value) {
-        m_Shader->Bind();
-        m_Shader->UploadUniformFloat(name, value);
-    }
-
-    void Material::Set(const std::string &name, glm::vec3 values) {
-        m_Shader->Bind();
-        m_Shader->UploadUniformFloat3(name, values);
-    }
-
-    void Material::Set(Light &light)
-    {
-        // Uploads light data to shader
-        m_Shader->Bind();
-        m_Shader->UploadUniformFloat3("lights.Position", light.Position);
-        m_Shader->UploadUniformFloat3("lights.Radiance", light.Radiance);
-        m_Shader->UploadUniformFloat("lights.Irradiance", light.Irradiance);
-    }
-
-    void Material::SetViewProjection(glm::mat4 viewProjectionMatrix)
-    {
-        m_ViewProjectionMatrix = &viewProjectionMatrix;
-    }
-
-    void Material::SetView(const glm::vec3 &view)
-    {
-        m_View = view;
-    }
-
-    Ref<Shader> Material::GetShader() {
-        return m_Shader;
-    }
-
-    void Material::Bind()
-    {
-        m_Shader->Bind();
-        m_Shader->UploadUniformMat4("u_ViewProjection", *m_ViewProjectionMatrix);
-        m_Shader->UploadUniformFloat3("u_View", m_View);
-        m_Shader->UploadUniformFloat("u_Metalness", metalness);
-        m_Shader->UploadUniformFloat("u_MetalnessTexToggle", 1.0);
-        for (int i = 0; i < m_Textures.size(); i++)
+        if(m_Shader->HasVSMaterialUniformBuffer())
         {
-            m_Textures[i]->Bind(i);
+            const auto& vsBuffer = m_Shader->GetVSMaterialUniformBuffer();
+            m_VSUniformStorageBuffer.Allocate(vsBuffer.GetSize());
+            m_VSUniformStorageBuffer.ZeroInitialize();
+        }
+
+        if (m_Shader->HasPSMaterialUniformBuffer())
+        {
+            const auto& psBuffer = m_Shader->GetPSMaterialUniformBuffer();
+            m_PSUniformStorageBuffer.Allocate(psBuffer.GetSize());
+            m_PSUniformStorageBuffer.ZeroInitialize();
         }
     }
+
+    ShaderUniformDeclaration* Material::FindUniformDeclaration(const std::string& name)
+    {
+        if (m_VSUniformStorageBuffer)
+		{
+			auto& declarations = m_Shader->GetVSMaterialUniformBuffer().GetUniformDeclarations();
+			for (ShaderUniformDeclaration* uniform : declarations)
+			{
+				if (uniform->GetName() == name)
+					return uniform;
+			}
+		}
+
+		if (m_PSUniformStorageBuffer)
+		{
+			auto& declarations = m_Shader->GetPSMaterialUniformBuffer().GetUniformDeclarations();
+			for (ShaderUniformDeclaration* uniform : declarations)
+			{
+				if (uniform->GetName() == name)
+					return uniform;
+			}
+		}
+		return nullptr;
+    }
+
+	ShaderResourceDeclaration* Material::FindResourceDeclaration(const std::string& name)
+	{
+		auto& resources = m_Shader->GetResources();
+		for (ShaderResourceDeclaration* resource : resources)
+		{
+			if (resource->GetName() == name)
+				return resource;
+		}
+		return nullptr;
+	}
+
+    Buffer& Material::GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration)
+	{
+		switch (uniformDeclaration->GetDomain())
+		{
+			case ShaderDomain::Vertex:    return m_VSUniformStorageBuffer;
+			case ShaderDomain::Pixel:     return m_PSUniformStorageBuffer;
+		}
+
+		JN_ASSERT(false, "Invalid uniform declaration domain! Material does not support this shader type.");
+		return m_VSUniformStorageBuffer;
+	}
+
+    void Material::Bind()
+	{
+		m_Shader->Bind();
+
+		if (m_VSUniformStorageBuffer)
+			m_Shader->SetVSMaterialUniformBuffer(m_VSUniformStorageBuffer);
+
+		if (m_PSUniformStorageBuffer)
+			m_Shader->SetPSMaterialUniformBuffer(m_PSUniformStorageBuffer);
+
+		BindTextures();
+	}
+
+    void Material::BindTextures()
+	{
+		for (size_t i = 0; i < m_Textures.size(); i++)
+		{
+			auto& texture = m_Textures[i];
+			if (texture)
+				texture->Bind(i);
+		}
+	}
+
+ 	Ref<MaterialInstance> MaterialInstance::Create(const Ref<Material>& material)
+	{
+		return Ref<MaterialInstance>::Create(material);
+	}
+
+	MaterialInstance::MaterialInstance(const Ref<Material>& material, const std::string& name)
+		: m_Material(material), m_Name(name)
+	{
+		m_Material->m_MaterialInstances.insert(this);
+		AllocateStorage();
+	}
+
+    MaterialInstance::~MaterialInstance()
+	{
+		m_Material->m_MaterialInstances.erase(this);
+	}
+
+	void MaterialInstance::AllocateStorage()
+	{
+		if (m_Material->m_Shader->HasVSMaterialUniformBuffer())
+		{
+			const auto& vsBuffer = m_Material->m_Shader->GetVSMaterialUniformBuffer();
+			m_VSUniformStorageBuffer.Allocate(vsBuffer.GetSize());
+			memcpy(m_VSUniformStorageBuffer.Data, m_Material->m_VSUniformStorageBuffer.Data, vsBuffer.GetSize());
+		}
+
+		if (m_Material->m_Shader->HasPSMaterialUniformBuffer())
+		{
+			const auto& psBuffer = m_Material->m_Shader->GetPSMaterialUniformBuffer();
+			m_PSUniformStorageBuffer.Allocate(psBuffer.GetSize());
+			memcpy(m_PSUniformStorageBuffer.Data, m_Material->m_PSUniformStorageBuffer.Data, psBuffer.GetSize());
+		}
+	}
+
+	void MaterialInstance::OnMaterialValueUpdated(ShaderUniformDeclaration* decl)
+	{
+		if (m_OverriddenValues.find(decl->GetName()) == m_OverriddenValues.end())
+		{
+			auto& buffer = GetUniformBufferTarget(decl);
+			auto& materialBuffer = m_Material->GetUniformBufferTarget(decl);
+			buffer.Write(materialBuffer.Data + decl->GetOffset(), decl->GetSize(), decl->GetOffset());
+		}
+	}
+
+	Buffer& MaterialInstance::GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration)
+	{
+		switch (uniformDeclaration->GetDomain())
+		{
+			case ShaderDomain::Vertex:    return m_VSUniformStorageBuffer;
+			case ShaderDomain::Pixel:     return m_PSUniformStorageBuffer;
+		}
+
+		JN_ASSERT(false, "Invalid uniform declaration domain! Material does not support this shader type");
+		return m_VSUniformStorageBuffer;
+	}
+
+	void MaterialInstance::SetFlag(MaterialFlag flag, bool value)
+	{
+		if (value)
+		{
+			m_Material->m_MaterialFlags |= (uint32_t)flag;
+		}
+		else
+		{
+			m_Material->m_MaterialFlags &= ~(uint32_t)flag;
+		}
+	}
+
+   	void MaterialInstance::Bind()
+	{
+		m_Material->m_Shader->Bind();
+
+		if (m_VSUniformStorageBuffer)
+			m_Material->m_Shader->SetVSMaterialUniformBuffer(m_VSUniformStorageBuffer);
+
+		if (m_PSUniformStorageBuffer)
+			m_Material->m_Shader->SetPSMaterialUniformBuffer(m_PSUniformStorageBuffer);
+
+		m_Material->BindTextures();
+		for (size_t i = 0; i < m_Textures.size(); i++)
+		{
+			auto& texture = m_Textures[i];
+			if (texture)
+				texture->Bind(i);
+		}
+	}
 }
