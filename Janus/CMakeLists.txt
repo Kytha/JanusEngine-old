@@ -11,7 +11,6 @@ SET ( JANUS_SOURCE
     src/Graphics/ShaderUniform.cpp
     src/Graphics/Texture.cpp
     src/Graphics/Mesh.cpp
-    src/Graphics/VertexArray.cpp
     src/Graphics/VertexBuffer.cpp
     src/Graphics/IndexBuffer.cpp
     src/Graphics/FrameBuffer.cpp
@@ -55,7 +54,6 @@ SET ( JANUS_HEADERS
     src/Graphics/ShaderUniform.h
     src/Graphics/Texture.h
     src/Graphics/Mesh.h
-    src/Graphics/VertexArray.h
     src/Graphics/VertexBuffer.h
     src/Graphics/IndexBuffer.h
     src/Graphics/FrameBuffer.h

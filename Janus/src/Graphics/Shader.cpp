@@ -683,7 +683,9 @@ namespace Janus {
 
     void Shader::Unbind() const
     {
-        glUseProgram(0);
+		Renderer::Submit([=]() {
+     		glUseProgram(0);
+		});
     }
 
 	void Shader::SetFloat(const std::string& name, float value)

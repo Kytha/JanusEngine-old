@@ -5,8 +5,8 @@
 
 #include "Core/Core.h"
 #include "Core/Timestep.h"
-
-#include "VertexArray.h"
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
 #include "Shader.h"
 #include "Material.h"
 #include "Graphics/Pipeline.h"

@@ -5,13 +5,13 @@
 
 namespace Janus {
     IndexBuffer::IndexBuffer(void *indices, uint32_t size)
-        : m_Size(size)
+        : m_RendererID(0), m_Size(size)
     {
         m_LocalData = Buffer::Copy(indices, size);
         Ref<IndexBuffer> instance = this;
-		Renderer::Submit([instance]() mutable {
+		    Renderer::Submit([instance]() mutable {
             glCreateBuffers(1, &instance->m_RendererID);
-            glBufferData(instance->m_RendererID, instance->m_Size, instance->m_LocalData.Data, GL_STATIC_DRAW);
+            glNamedBufferData(instance->m_RendererID, instance->m_Size, instance->m_LocalData.Data, GL_STATIC_DRAW);
         });
     }
 

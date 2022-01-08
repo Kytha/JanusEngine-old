@@ -24,7 +24,6 @@
 #include "Graphics/SceneRenderer.h"
 #include "Graphics/VertexBuffer.h"
 #include "Graphics/IndexBuffer.h"
-#include "Graphics/VertexArray.h"
 #include "Graphics/Framebuffer.h"
 #include "Graphics/Light.h"
 #include "Graphics/Camera.h"

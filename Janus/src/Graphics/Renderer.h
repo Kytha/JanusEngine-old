@@ -1,7 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "Shader.h"
-#include "VertexArray.h"
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
 #include "ShaderLibrary.h"
 #include "Mesh.h"
 #include "Scene/Scene.h"

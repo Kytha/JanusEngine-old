@@ -27,7 +27,6 @@ namespace Janus {
         };
         Ref<MaterialInstance> GridMaterial;
         std::vector<DrawCommand> DrawList;
-        Ref<Texture> texture;
     };
 
     static SceneRendererData s_Data;
@@ -35,9 +34,9 @@ namespace Janus {
     void SceneRenderer::Init()
     {
         FramebufferSpecification geoFramebufferSpec;
-        geoFramebufferSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
+        geoFramebufferSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
 		geoFramebufferSpec.Samples = 1;
-		geoFramebufferSpec.ClearColor = { 0.0f, 1.0f, 0.0f, 1.0f };
+		geoFramebufferSpec.ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
         RenderPassSpecification geoRenderPassSpec;
 		geoRenderPassSpec.TargetFramebuffer = Framebuffer::Create(geoFramebufferSpec);
@@ -53,10 +52,10 @@ namespace Janus {
 
         auto gridShader = Renderer::GetShaderLibrary()->Get("janus_grid");
 		s_Data.GridMaterial = MaterialInstance::Create(Material::Create(gridShader));
+        s_Data.GridMaterial->SetFlag(MaterialFlag::TwoSided, true);
         float gridScale = 16.025f, gridSize = 0.025f;
 		s_Data.GridMaterial->Set("u_Scale", gridScale);
 		s_Data.GridMaterial->Set("u_Res", gridSize);
-        s_Data.texture = Ref<Texture>::Create("assets/textures/marble_bust_01_diff_4k.jpg");
         //s_Data.CompositeShader = Ref<Shader>::Create("assets/shaders/SceneComposite.glsl");
     }
 
@@ -109,7 +108,7 @@ namespace Janus {
 		Renderer::SubmitQuad(s_Data.GridMaterial, glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(16.0f)));
 
         //s_Data.GeoPass->GetSpecification().TargetFramebuffer->BindTexture();
-        
+        //s_Data.shader->Bind();
         //s_Data.texture->Bind(0);
         //Renderer::SubmitFullscreenQuad(nullptr);
         Renderer::EndRenderPass();

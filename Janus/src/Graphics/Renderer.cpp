@@ -23,9 +23,32 @@ namespace Janus {
 
     void Renderer::Init()
     {
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+		unsigned int vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
+		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glFrontFace(GL_CCW);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glEnable(GL_MULTISAMPLE);
+		glEnable(GL_STENCIL_TEST);
+
+
+
+
         s_Data.m_ShaderLibrary = Ref<ShaderLibrary>::Create();
         Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_pbr.glsl", "janus_pbr");
 		Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_grid.glsl", "janus_grid");
+		//Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_quad.glsl", "janus_quad");
         SceneRenderer::Init();
 		float x = -1;
 		float y = -1;
@@ -60,6 +83,7 @@ namespace Janus {
 		s_Data.m_FullscreenQuadVertexBuffer = Ref<VertexBuffer>::Create(data, 4 * sizeof(QuadVertex));
 		uint32_t indices[6] = { 0, 1, 2, 2, 3, 0, };
 		s_Data.m_FullscreenQuadIndexBuffer = Ref<IndexBuffer>::Create(indices, 6 * sizeof(uint32_t));
+
     }
 
 	Ref<ShaderLibrary> Renderer::GetShaderLibrary()
