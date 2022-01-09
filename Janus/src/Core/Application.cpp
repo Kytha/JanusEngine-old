@@ -1,8 +1,7 @@
 #include "jnpch.h"
 #include "Application.h"
-#include "Core/Log.h"
-#include "Core/Input.h"
 #include "Graphics/Renderer.h"
+#include "Core/Input.h"
 #include <glfw/glfw3.h>
 
 namespace Janus {

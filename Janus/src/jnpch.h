@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "Core/Log.h"
+#include "Core/Core.h"
 
 #ifdef JN_PLATFORM_WINDOWS
 	#include <Windows.h>

@@ -36,7 +36,6 @@ SET ( JANUS_SOURCE
 SET ( JANUS_HEADERS
     src/Core/Core.h
     src/Core/Log.h
-    src/jnpch.h
     src/Core/Events/Event.h
     src/Core/Events/KeyEvent.h
     src/Core/Events/MouseEvent.h
@@ -115,6 +114,9 @@ TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/imgui/backends)
 TARGET_INCLUDE_DIRECTORIES( janus PUBLIC vendors/entt/single_include)
 
 TARGET_LINK_LIBRARIES( janus PUBLIC glfw PUBLIC Glad PUBLIC spdlog PUBLIC glm PUBLIC assimp PUBLIC EnTT PUBLIC imgui)
+
+TARGET_PRECOMPILE_HEADERS( janus
+    PUBLIC "src/jnpch.h")
 
 INSTALL ( TARGETS
   janus
