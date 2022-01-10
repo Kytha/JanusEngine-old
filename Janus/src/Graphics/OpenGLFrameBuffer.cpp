@@ -38,7 +38,7 @@ namespace Janus
 				return GL_UNSIGNED_INT_24_8;
 			}
 
-			JN_ASSERT(false, "Unknown format!");
+			JN_ASSERT(false, "FRAMEBUFFER_ERROR: Unknown format!");
 			return 0;
 		}
 
@@ -197,7 +197,7 @@ namespace Janus
 								 glDrawBuffer(GL_NONE);
 							 }
 
-							 JN_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
+							 JN_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "FRAMEBUFFER_ERROR: Framebuffer is incomplete!");
 
 							 glBindFramebuffer(GL_FRAMEBUFFER, 0);
 						 });

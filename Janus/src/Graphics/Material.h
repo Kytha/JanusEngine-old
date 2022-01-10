@@ -36,7 +36,7 @@ namespace Janus
 		void Set(const std::string &name, const T &value)
 		{
 			auto decl = FindUniformDeclaration(name);
-			JN_ASSERT(decl, "Could not find uniform");
+			JN_ASSERT(decl, "MATERIAL_ERROR: Could not find uniform");
 			auto &buffer = GetUniformBufferTarget(decl);
 			buffer.Write((byte *)&value, decl->GetSize(), decl->GetOffset());
 
@@ -57,7 +57,7 @@ namespace Janus
 		T &Get(const std::string &name)
 		{
 			auto decl = FindUniformDeclaration(name);
-			JN_ASSERT(decl, "Could not find uniform with name 'x'");
+			JN_ASSERT(decl, "MATERIAL_ERROR: Could not find uniform!");
 			auto &buffer = GetUniformBufferTarget(decl);
 			return buffer.Read<T>(decl->GetOffset());
 		}
@@ -67,7 +67,7 @@ namespace Janus
 		{
 			auto decl = FindResourceDeclaration(name);
 			uint32_t slot = decl->GetRegister();
-			JN_ASSERT(slot < m_Textures.size(), "Texture slot is invalid!");
+			JN_ASSERT(slot < m_Textures.size(), "MATERIAL_ERROR: Texture slot is invalid!");
 			return m_Textures[slot];
 		}
 
@@ -105,7 +105,7 @@ namespace Janus
 			auto decl = m_Material->FindUniformDeclaration(name);
 			if (!decl)
 			{
-				JN_ASSERT(decl, "Could not find uniform");
+				JN_ASSERT(decl, "MATERIAL_ERROR: Could not find uniform!");
 				return;
 			}
 			auto &buffer = GetUniformBufferTarget(decl);
@@ -118,7 +118,7 @@ namespace Janus
 			auto decl = m_Material->FindResourceDeclaration(name);
 			if (!decl)
 			{
-				JN_CORE_WARN("Cannot find material property: ", name);
+				JN_CORE_WARN("MATERIAL_ERROR: Cannot find material property: {0}", name);
 				return;
 			}
 			uint32_t slot = decl->GetRegister();
@@ -131,7 +131,7 @@ namespace Janus
 		T &Get(const std::string &name)
 		{
 			auto decl = m_Material->FindUniformDeclaration(name);
-			JN_ASSERT(decl, "Could not find uniform");
+			JN_ASSERT(decl, "MATERIAL_ERROR: Could not find uniform!");
 			auto &buffer = GetUniformBufferTarget(decl);
 			return buffer.Read<T>(decl->GetOffset());
 		}
@@ -140,9 +140,9 @@ namespace Janus
 		Ref<T> GetResource(const std::string &name)
 		{
 			auto decl = m_Material->FindResourceDeclaration(name);
-			JN_ASSERT(decl, "Could not find uniform");
+			JN_ASSERT(decl, "MATERIAL_ERROR: Could not find uniform!");
 			uint32_t slot = decl->GetRegister();
-			JN_ASSERT(slot < m_Textures.size(), "Texture slot is invalid!");
+			JN_ASSERT(slot < m_Textures.size(), "MATERIAL_ERROR: Texture slot is invalid!");
 			return Ref<T>(m_Textures[slot]);
 		}
 

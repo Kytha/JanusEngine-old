@@ -225,7 +225,7 @@ namespace Janus
 			if (t == ShaderUniformDeclaration::Type::NONE)
 			{
 				ShaderStruct *s = FindStruct(typeString);
-				JN_ASSERT(s, "");
+				JN_ASSERT(s, "SHADER_ERROR: Unknown uniform datatype!");
 				declaration = new ShaderUniformDeclaration(domain, s, name, count);
 			}
 			else
@@ -576,7 +576,7 @@ namespace Janus
 		if (uniform->GetLocation() == -1)
 			return;
 
-		JN_ASSERT(uniform->GetLocation() != -1, "Uniform has invalid location!");
+		JN_ASSERT(uniform->GetLocation() != -1, "SHADER_ERROR: Uniform has invalid location!");
 
 		uint32_t offset = uniform->GetOffset();
 		switch (uniform->GetType())
@@ -609,7 +609,7 @@ namespace Janus
 			UploadUniformStruct(uniform, buffer.Data, offset);
 			break;
 		default:
-			JN_ASSERT(false, "Unknown uniform type!");
+			JN_ASSERT(false, "SHADER_ERROR: Unknown uniform type!");
 		}
 	}
 
@@ -648,7 +648,7 @@ namespace Janus
 			UploadUniformStruct(uniform, buffer.Data, offset);
 			break;
 		default:
-			JN_ASSERT(false, "Unknown uniform type!");
+			JN_ASSERT(false, "SHADER_ERROR: Unknown uniform type!");
 		}
 	}
 
@@ -681,7 +681,7 @@ namespace Janus
 			UploadUniformMat4(field.GetLocation(), *(glm::mat4 *)&data[offset]);
 			break;
 		default:
-			JN_ASSERT(false, "Unknown uniform type!");
+			JN_ASSERT(false, "SHADER_ERROR: Unknown uniform type!");
 		}
 	}
 

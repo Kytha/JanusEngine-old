@@ -146,7 +146,7 @@ namespace Janus
 
 	void Renderer::BeginRenderPass(Ref<RenderPass> renderPass, bool clear)
 	{
-		JN_ASSERT(renderPass, "Render pass cannot be null!");
+		JN_ASSERT(renderPass, "RENDERER_ERROR: Render pass cannot be null!");
 		s_Data.m_ActiveRenderPass = renderPass;
 
 		renderPass->GetSpecification().TargetFramebuffer->Bind();
@@ -163,7 +163,7 @@ namespace Janus
 
 	void Renderer::EndRenderPass()
 	{
-		JN_ASSERT(s_Data.m_ActiveRenderPass, "No active render pass! Have you called Renderer::EndRenderPass twice?");
+		JN_ASSERT(s_Data.m_ActiveRenderPass, "RENDERER_ERROR: No active render pass! Have you called Renderer::EndRenderPass twice?");
 		s_Data.m_ActiveRenderPass->GetSpecification().TargetFramebuffer->Unbind();
 		s_Data.m_ActiveRenderPass = nullptr;
 	}

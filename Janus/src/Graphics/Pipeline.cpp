@@ -24,7 +24,7 @@ namespace Janus {
 			case ShaderDataType::Bool:     return GL_BOOL;
 		}
 
-		JN_ASSERT(false, "Unknown ShaderDataType!");
+		JN_ASSERT(false, "PIPELINE_ERROR: Unknown ShaderDataType!");
 		return 0;
 	}
 
@@ -45,7 +45,7 @@ namespace Janus {
 
 	void Pipeline::Invalidate()
 	{
-		JN_ASSERT(m_Specification.Layout.GetElements().size(), "Layout is empty!");
+		JN_ASSERT(m_Specification.Layout.GetElements().size(), "PIPELINE_ERROR: Layout is empty!");
 
 		Ref<Pipeline> instance = this;
 		Renderer::Submit([instance]() mutable

@@ -80,7 +80,7 @@ namespace Janus
 			return m_PSUniformStorageBuffer;
 		}
 
-		JN_ASSERT(false, "Invalid uniform declaration domain! Material does not support this shader type.");
+		JN_ASSERT(false, "MATERIAL_ERROR: Invalid uniform declaration domain! Material does not support this shader type.");
 		return m_VSUniformStorageBuffer;
 	}
 
@@ -161,7 +161,7 @@ namespace Janus
 			return m_PSUniformStorageBuffer;
 		}
 
-		JN_ASSERT(false, "Invalid uniform declaration domain! Material does not support this shader type");
+		JN_ASSERT(false, "APPLICATION_ERROR: Invalid uniform declaration domain! Material does not support this shader type");
 		return m_VSUniformStorageBuffer;
 	}
 

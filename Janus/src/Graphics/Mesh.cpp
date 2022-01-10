@@ -63,7 +63,7 @@ namespace Janus
         const aiScene *scene = m_Importer->ReadFile(filename, s_MeshImportFlags);
         if (!scene || !scene->HasMeshes())
         {
-            JN_ASSERT(false, "ERROR::MESH:: Scene has no meshes");
+            JN_ASSERT(false, "MESH_ERROR: Scene has no meshes!");
         }
 
         m_MeshShader = Renderer::GetShaderLibrary()->Get("janus_pbr");
@@ -200,12 +200,12 @@ namespace Janus
                     }
                     else
                     {
-                        JN_CORE_ERROR("Could not load texture: {0}", texturePath);
+                        JN_CORE_ERROR("MESH_IMPORT_MSG: Could not load texture: {0}", texturePath);
                     }
                 }
                 else
                 {
-                    JN_CORE_WARN("No normal map");
+                    JN_CORE_WARN("MESH_IMPORT_MSG: No normal map");
                 }
 
                 if (aiMaterial->GetTexture(aiTextureType_SHININESS, 0, &aiTexPath) == AI_SUCCESS)
@@ -222,7 +222,7 @@ namespace Janus
                     }
                     else
                     {
-                        JN_CORE_ERROR("Could not load texture: {0}", texturePath);
+                        JN_CORE_ERROR("MESH_IMPORT_MSG: Could not load texture: {0}", texturePath);
                     }
                 }
                 bool metalnessTextureFound = false;
@@ -307,7 +307,7 @@ namespace Janus
 
                 if (!metalnessTextureFound)
                 {
-                    JN_CORE_WARN("No metalness map");
+                    JN_CORE_WARN("MESH_IMPORT_MSG: No metalness map");
                     mi->Set("u_Metalness", metalness);
                     mi->Set("u_MetalnessTexToggle", 0.0f);
                 }

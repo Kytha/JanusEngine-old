@@ -19,7 +19,7 @@ namespace Janus
         else
         {
             // Shader does not exist. Halt program
-            JN_ASSERT(false, "Shader " + name + " could not be found");
+            JN_ASSERT(false, "SHADER_LIBRARY_ERROR: Shader " + name + " could not be found");
             return nullptr;
         }
     }

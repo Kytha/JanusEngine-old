@@ -40,7 +40,7 @@ namespace Janus
 		if (!s_GLFWInitialized)
 		{
 			int success = glfwInit();
-			JN_ASSERT(success, "Could not intialize GLFW!");
+			JN_ASSERT(success, "WINDOW_ERROR: Could not initialize GLFW!");
 			glfwSetErrorCallback(GLFWErrorCallback);
 			s_GLFWInitialized = true;
 		}
@@ -56,7 +56,7 @@ namespace Janus
 
 		// Get Hardware specific implementation of OpenGL
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		JN_ASSERT(status, "Failed to initialize Glad!");
+		JN_ASSERT(status, "WINDOW_ERROR: Failed to initialize Glad!");
 
 		JN_CORE_INFO("OpenGL Info:");
 		JN_CORE_INFO("  Vendor: {0}", glGetString(GL_VENDOR));
