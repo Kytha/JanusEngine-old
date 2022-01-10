@@ -30,9 +30,9 @@ namespace Janus
 		void Close();
 		// Exposes the window object for input polling
 		inline Window &GetWindow() { return *m_Window; }
+		inline static Application &Get() { return *s_Instance; }
 		ImGuiLayer *GetImGuiLayer() { return m_ImGuiLayer; }
 		void RenderImGui();
-		inline static Application &Get() { return *s_Instance; }
 
 	private:
 		bool OnWindowClose(WindowCloseEvent &e);
@@ -40,9 +40,9 @@ namespace Janus
 		// Pointer to the applications window object. An application can only have one window
 		std::unique_ptr<Window> m_Window;
 		ImGuiLayer *m_ImGuiLayer;
+		LayerStack m_LayerStack;
 		bool m_Running = true;
 		bool m_Minimized = false;
-		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;
 
 	private:

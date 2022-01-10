@@ -74,7 +74,8 @@ namespace Janus {
 		virtual uint32_t GetDepthAttachmentRendererID() const = 0;
 
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
-
+		
+	public:
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
 	};
 
@@ -86,14 +87,16 @@ namespace Janus {
 
 		std::weak_ptr<Framebuffer> AllocateBuffer();
 		void Add(const Ref<Framebuffer>& framebuffer);
-
 		std::vector<Ref<Framebuffer>>& GetAll() { return m_Pool; }
 		const std::vector<Ref<Framebuffer>>& GetAll() const { return m_Pool; }
 
+	public:
 		inline static FramebufferPool* GetGlobal() { return s_Instance; }
+
 	private:
 		std::vector<Ref<Framebuffer>> m_Pool;
 
+	private:
 		static FramebufferPool* s_Instance;
 	};
 

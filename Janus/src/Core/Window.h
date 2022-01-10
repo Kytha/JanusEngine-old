@@ -42,7 +42,7 @@ namespace Janus {
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetNativeWindow() const = 0;
-
+	public:
 		static Window* Create(const WindowProps& props = WindowProps());
 	};
 }
