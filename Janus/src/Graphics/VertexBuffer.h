@@ -1,10 +1,12 @@
 #pragma once
-#include "Core/Core.h"
-#include "Core/Buffer.h"
-#include "jnpch.h"
+
 #include <glad/glad.h>
 
-namespace Janus {
+#include "Core/Core.h"
+#include "Core/Buffer.h"
+
+namespace Janus
+{
     // All supported data types for shader layouts
     enum class ShaderDataType
     {
@@ -142,7 +144,9 @@ namespace Janus {
     public:
         enum class VertexBufferUsage
         {
-            None = 0, Static = 1, Dynamic = 2
+            None = 0,
+            Static = 1,
+            Dynamic = 2
         };
 
         VertexBuffer(void *vertices, uint32_t size);
@@ -152,8 +156,9 @@ namespace Janus {
         void Unbind();
         void SetLayout(const BufferLayout &layout);
         const BufferLayout &GetLayout();
-        void SetData(void* data, uint32_t size, uint32_t offset = 0);
+        void SetData(void *data, uint32_t size, uint32_t offset = 0);
         static GLenum Usage(VertexBufferUsage usage);
+
     private:
         uint32_t m_RendererID;
         BufferLayout m_Layout;

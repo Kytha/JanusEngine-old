@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Core.h"
 #include <xhash>
 
-namespace Janus {
+#include "Core/Core.h"
+
+namespace Janus
+{
 
 	// "UUID" (universally unique identifier) or GUID is (usually) a 128-bit integer
 	// used to "uniquely" identify information. In Hazel, even though we use the term
@@ -15,22 +17,24 @@ namespace Janus {
 	public:
 		UUID();
 		UUID(uint64_t uuid);
-		UUID(const UUID& other);
+		UUID(const UUID &other);
 
-		operator uint64_t () { return m_UUID; }
-		operator const uint64_t () const { return m_UUID; }
+		operator uint64_t() { return m_UUID; }
+		operator const uint64_t() const { return m_UUID; }
+
 	private:
 		uint64_t m_UUID;
 	};
-		
+
 }
 
-namespace std {
+namespace std
+{
 
 	template <>
 	struct hash<Janus::UUID>
 	{
-		std::size_t operator()(const Janus::UUID& uuid) const
+		std::size_t operator()(const Janus::UUID &uuid) const
 		{
 			return hash<uint64_t>()((uint64_t)uuid);
 		}

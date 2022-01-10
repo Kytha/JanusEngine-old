@@ -1,43 +1,46 @@
-#include "Material.h"
-#include "Light.h"
+#include "jnpch.h"
 
-namespace Janus {
+#include "Graphics/Material.h"
+#include "Graphics/Light.h"
 
-	Ref<Material> Material::Create(const Ref<Shader>& shader)
+namespace Janus
+{
+
+	Ref<Material> Material::Create(const Ref<Shader> &shader)
 	{
 		return Ref<Material>::Create(shader);
 	}
 
-    Material::Material(const Ref<Shader>& shader) : m_Shader(shader)
-    {
-        AllocateStorage();
-        m_MaterialFlags |= (uint32_t)MaterialFlag::DepthTest;
+	Material::Material(const Ref<Shader> &shader) : m_Shader(shader)
+	{
+		AllocateStorage();
+		m_MaterialFlags |= (uint32_t)MaterialFlag::DepthTest;
 		m_MaterialFlags |= (uint32_t)MaterialFlag::Blend;
-    }
+	}
 
-    void Material::AllocateStorage()
-    {
-        if(m_Shader->HasVSMaterialUniformBuffer())
-        {
-            const auto& vsBuffer = m_Shader->GetVSMaterialUniformBuffer();
-            m_VSUniformStorageBuffer.Allocate(vsBuffer.GetSize());
-            m_VSUniformStorageBuffer.ZeroInitialize();
-        }
-
-        if (m_Shader->HasPSMaterialUniformBuffer())
-        {
-            const auto& psBuffer = m_Shader->GetPSMaterialUniformBuffer();
-            m_PSUniformStorageBuffer.Allocate(psBuffer.GetSize());
-            m_PSUniformStorageBuffer.ZeroInitialize();
-        }
-    }
-
-    ShaderUniformDeclaration* Material::FindUniformDeclaration(const std::string& name)
-    {
-        if (m_VSUniformStorageBuffer)
+	void Material::AllocateStorage()
+	{
+		if (m_Shader->HasVSMaterialUniformBuffer())
 		{
-			auto& declarations = m_Shader->GetVSMaterialUniformBuffer().GetUniformDeclarations();
-			for (ShaderUniformDeclaration* uniform : declarations)
+			const auto &vsBuffer = m_Shader->GetVSMaterialUniformBuffer();
+			m_VSUniformStorageBuffer.Allocate(vsBuffer.GetSize());
+			m_VSUniformStorageBuffer.ZeroInitialize();
+		}
+
+		if (m_Shader->HasPSMaterialUniformBuffer())
+		{
+			const auto &psBuffer = m_Shader->GetPSMaterialUniformBuffer();
+			m_PSUniformStorageBuffer.Allocate(psBuffer.GetSize());
+			m_PSUniformStorageBuffer.ZeroInitialize();
+		}
+	}
+
+	ShaderUniformDeclaration *Material::FindUniformDeclaration(const std::string &name)
+	{
+		if (m_VSUniformStorageBuffer)
+		{
+			auto &declarations = m_Shader->GetVSMaterialUniformBuffer().GetUniformDeclarations();
+			for (ShaderUniformDeclaration *uniform : declarations)
 			{
 				if (uniform->GetName() == name)
 					return uniform;
@@ -46,20 +49,20 @@ namespace Janus {
 
 		if (m_PSUniformStorageBuffer)
 		{
-			auto& declarations = m_Shader->GetPSMaterialUniformBuffer().GetUniformDeclarations();
-			for (ShaderUniformDeclaration* uniform : declarations)
+			auto &declarations = m_Shader->GetPSMaterialUniformBuffer().GetUniformDeclarations();
+			for (ShaderUniformDeclaration *uniform : declarations)
 			{
 				if (uniform->GetName() == name)
 					return uniform;
 			}
 		}
 		return nullptr;
-    }
+	}
 
-	ShaderResourceDeclaration* Material::FindResourceDeclaration(const std::string& name)
+	ShaderResourceDeclaration *Material::FindResourceDeclaration(const std::string &name)
 	{
-		auto& resources = m_Shader->GetResources();
-		for (ShaderResourceDeclaration* resource : resources)
+		auto &resources = m_Shader->GetResources();
+		for (ShaderResourceDeclaration *resource : resources)
 		{
 			if (resource->GetName() == name)
 				return resource;
@@ -67,19 +70,21 @@ namespace Janus {
 		return nullptr;
 	}
 
-    Buffer& Material::GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration)
+	Buffer &Material::GetUniformBufferTarget(ShaderUniformDeclaration *uniformDeclaration)
 	{
 		switch (uniformDeclaration->GetDomain())
 		{
-			case ShaderDomain::Vertex:    return m_VSUniformStorageBuffer;
-			case ShaderDomain::Pixel:     return m_PSUniformStorageBuffer;
+		case ShaderDomain::Vertex:
+			return m_VSUniformStorageBuffer;
+		case ShaderDomain::Pixel:
+			return m_PSUniformStorageBuffer;
 		}
 
 		JN_ASSERT(false, "Invalid uniform declaration domain! Material does not support this shader type.");
 		return m_VSUniformStorageBuffer;
 	}
 
-    void Material::Bind()
+	void Material::Bind()
 	{
 		m_Shader->Bind();
 
@@ -92,29 +97,29 @@ namespace Janus {
 		BindTextures();
 	}
 
-    void Material::BindTextures()
+	void Material::BindTextures()
 	{
 		for (size_t i = 0; i < m_Textures.size(); i++)
 		{
-			auto& texture = m_Textures[i];
+			auto &texture = m_Textures[i];
 			if (texture)
 				texture->Bind(i);
 		}
 	}
 
- 	Ref<MaterialInstance> MaterialInstance::Create(const Ref<Material>& material)
+	Ref<MaterialInstance> MaterialInstance::Create(const Ref<Material> &material)
 	{
 		return Ref<MaterialInstance>::Create(material);
 	}
 
-	MaterialInstance::MaterialInstance(const Ref<Material>& material, const std::string& name)
+	MaterialInstance::MaterialInstance(const Ref<Material> &material, const std::string &name)
 		: m_Material(material), m_Name(name)
 	{
 		m_Material->m_MaterialInstances.insert(this);
 		AllocateStorage();
 	}
 
-    MaterialInstance::~MaterialInstance()
+	MaterialInstance::~MaterialInstance()
 	{
 		m_Material->m_MaterialInstances.erase(this);
 	}
@@ -123,35 +128,37 @@ namespace Janus {
 	{
 		if (m_Material->m_Shader->HasVSMaterialUniformBuffer())
 		{
-			const auto& vsBuffer = m_Material->m_Shader->GetVSMaterialUniformBuffer();
+			const auto &vsBuffer = m_Material->m_Shader->GetVSMaterialUniformBuffer();
 			m_VSUniformStorageBuffer.Allocate(vsBuffer.GetSize());
 			memcpy(m_VSUniformStorageBuffer.Data, m_Material->m_VSUniformStorageBuffer.Data, vsBuffer.GetSize());
 		}
 
 		if (m_Material->m_Shader->HasPSMaterialUniformBuffer())
 		{
-			const auto& psBuffer = m_Material->m_Shader->GetPSMaterialUniformBuffer();
+			const auto &psBuffer = m_Material->m_Shader->GetPSMaterialUniformBuffer();
 			m_PSUniformStorageBuffer.Allocate(psBuffer.GetSize());
 			memcpy(m_PSUniformStorageBuffer.Data, m_Material->m_PSUniformStorageBuffer.Data, psBuffer.GetSize());
 		}
 	}
 
-	void MaterialInstance::OnMaterialValueUpdated(ShaderUniformDeclaration* decl)
+	void MaterialInstance::OnMaterialValueUpdated(ShaderUniformDeclaration *decl)
 	{
 		if (m_OverriddenValues.find(decl->GetName()) == m_OverriddenValues.end())
 		{
-			auto& buffer = GetUniformBufferTarget(decl);
-			auto& materialBuffer = m_Material->GetUniformBufferTarget(decl);
+			auto &buffer = GetUniformBufferTarget(decl);
+			auto &materialBuffer = m_Material->GetUniformBufferTarget(decl);
 			buffer.Write(materialBuffer.Data + decl->GetOffset(), decl->GetSize(), decl->GetOffset());
 		}
 	}
 
-	Buffer& MaterialInstance::GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration)
+	Buffer &MaterialInstance::GetUniformBufferTarget(ShaderUniformDeclaration *uniformDeclaration)
 	{
 		switch (uniformDeclaration->GetDomain())
 		{
-			case ShaderDomain::Vertex:    return m_VSUniformStorageBuffer;
-			case ShaderDomain::Pixel:     return m_PSUniformStorageBuffer;
+		case ShaderDomain::Vertex:
+			return m_VSUniformStorageBuffer;
+		case ShaderDomain::Pixel:
+			return m_PSUniformStorageBuffer;
 		}
 
 		JN_ASSERT(false, "Invalid uniform declaration domain! Material does not support this shader type");
@@ -170,7 +177,7 @@ namespace Janus {
 		}
 	}
 
-   	void MaterialInstance::Bind()
+	void MaterialInstance::Bind()
 	{
 		m_Material->m_Shader->Bind();
 
@@ -183,7 +190,7 @@ namespace Janus {
 		m_Material->BindTextures();
 		for (size_t i = 0; i < m_Textures.size(); i++)
 		{
-			auto& texture = m_Textures[i];
+			auto &texture = m_Textures[i];
 			if (texture)
 				texture->Bind(i);
 		}

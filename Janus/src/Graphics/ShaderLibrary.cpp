@@ -1,7 +1,9 @@
 #include "jnpch.h"
-#include "ShaderLibrary.h"
 
-namespace Janus {
+#include "Graphics/ShaderLibrary.h"
+
+namespace Janus
+{
     ShaderLibrary::ShaderLibrary()
     {
     }
@@ -14,7 +16,8 @@ namespace Janus {
     {
         if (!(m_Shaders.find(name) == m_Shaders.end()))
             return m_Shaders[name];
-        else {
+        else
+        {
             // Shader does not exist. Halt program
             JN_ASSERT(false, "Shader " + name + " could not be found");
             return nullptr;

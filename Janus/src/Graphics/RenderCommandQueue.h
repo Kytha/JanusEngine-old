@@ -1,7 +1,5 @@
 #pragma once
 
-#include "jnpch.h"
-
 namespace Janus {
 
 	class RenderCommandQueue

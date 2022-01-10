@@ -1,11 +1,11 @@
 #include "jnpch.h"
-#include "RenderPass.h"
+#include "Graphics/RenderPass.h"
 
-namespace Janus {
+namespace Janus
+{
 
-	RenderPass::RenderPass(const RenderPassSpecification& spec)
+	RenderPass::RenderPass(const RenderPassSpecification &spec)
 		: m_Specification(spec)
 	{
-
 	}
 }

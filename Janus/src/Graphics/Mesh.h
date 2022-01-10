@@ -5,24 +5,27 @@
 
 #include "Core/Core.h"
 #include "Core/Timestep.h"
-#include "IndexBuffer.h"
-#include "VertexBuffer.h"
-#include "Shader.h"
-#include "Material.h"
+
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/VertexBuffer.h"
+#include "Graphics/Shader.h"
+#include "Graphics/Material.h"
 #include "Graphics/Pipeline.h"
-#include "ShaderLibrary.h"
+#include "Graphics/ShaderLibrary.h"
 //#include "AABB.h"
+
 struct aiNode;
 struct aiAnimation;
 struct aiNodeAnim;
 struct aiScene;
 
-namespace Assimp {
-	class Importer;
+namespace Assimp
+{
+    class Importer;
 }
 
-
-namespace Janus {
+namespace Janus
+{
     struct Vertex
     {
         glm::vec3 Position;
@@ -55,33 +58,34 @@ namespace Janus {
     class Mesh : public RefCounted
     {
     public:
-        Mesh(const std::string& filename);
+        Mesh(const std::string &filename);
         ~Mesh();
 
         void OnUpdate(Timestep ts);
         void DumpVertexBuffer();
 
         Ref<Shader> GetMeshShader() { return m_MeshShader; }
-		Ref<Material> GetMaterial() { return m_BaseMaterial; }
-		const std::vector<Ref<MaterialInstance>> GetMaterials() { return m_Materials; }
-        const std::vector<Ref<Texture>>& GetTextures() const { return m_Textures; }
-        const std::string& GetFilePath() const { return m_FilePath; }
+        Ref<Material> GetMaterial() { return m_BaseMaterial; }
+        const std::vector<Ref<MaterialInstance>> GetMaterials() { return m_Materials; }
+        const std::vector<Ref<Texture>> &GetTextures() const { return m_Textures; }
+        const std::string &GetFilePath() const { return m_FilePath; }
         std::vector<Submesh> m_Submeshes;
+
     private:
-        void TraverseNodes(aiNode* node, const glm::mat4& parentTransform = glm::mat4(1.0f), uint32_t level = 0);
+        void TraverseNodes(aiNode *node, const glm::mat4 &parentTransform = glm::mat4(1.0f), uint32_t level = 0);
+
     private:
-        
         std::unique_ptr<Assimp::Importer> m_Importer;
 
         glm::mat4 m_InverseTransform;
 
         Ref<Pipeline> m_Pipeline;
-		Ref<VertexBuffer> m_VertexBuffer;
-		Ref<IndexBuffer> m_IndexBuffer;
+        Ref<VertexBuffer> m_VertexBuffer;
+        Ref<IndexBuffer> m_IndexBuffer;
         Ref<Shader> m_MeshShader;
         std::vector<Vertex> m_Vertices;
         std::vector<Index> m_Indices;
-        const aiScene* m_Scene;
+        const aiScene *m_Scene;
 
         // Materials
         Ref<Material> m_BaseMaterial;

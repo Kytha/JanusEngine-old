@@ -33,6 +33,4 @@
 #include "Scene/Scene.h"
 #include "Scene/Components.h"
 
-#include "ImGui/ImGui.h"
-
 #include "Core/EntryPoint.h"

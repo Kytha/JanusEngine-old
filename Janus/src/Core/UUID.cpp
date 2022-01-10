@@ -1,9 +1,11 @@
 #include "jnpch.h"
-#include "UUID.h"
 
 #include <random>
 
-namespace Janus {
+#include "Core/UUID.h"
+
+namespace Janus
+{
 
 	static std::random_device s_RandomDevice;
 	static std::mt19937_64 eng(s_RandomDevice());
@@ -19,7 +21,7 @@ namespace Janus {
 	{
 	}
 
-	UUID::UUID(const UUID& other)
+	UUID::UUID(const UUID &other)
 		: m_UUID(other.m_UUID)
 	{
 	}

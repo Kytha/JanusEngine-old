@@ -1,18 +1,22 @@
 #include "jnpch.h"
-#include "Application.h"
-#include "Graphics/Renderer.h"
+
+#include "Core/Application.h"
 #include "Core/Input.h"
+
+#include "Graphics/Renderer.h"
+
 #include <glfw/glfw3.h>
 
-namespace Janus {
+namespace Janus
+{
 
-	#define BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+#define BIND_EVENT_FN(fn) [this](auto &&...args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 
-	Application* Application::s_Instance = nullptr;
+	Application *Application::s_Instance = nullptr;
 
 	Application::Application()
 	{
-		// enforcing a single instance of application 
+		// enforcing a single instance of application
 		JN_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 		m_Window = std::unique_ptr<Window>(Window::Create());
@@ -25,10 +29,9 @@ namespace Janus {
 
 	Application::~Application()
 	{
-
 	}
 
-	void Application::OnEvent(Event& e)
+	void Application::OnEvent(Event &e)
 	{
 		// Handle WindowClose event first
 		EventDispatcher dispatcher(e);
@@ -46,17 +49,19 @@ namespace Janus {
 	void Application::Run()
 	{
 		// MAIN APP LOOP
-		while (m_Running) {
+		while (m_Running)
+		{
 			float time = (float)glfwGetTime(); // Should be Platform::GetTime
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 			// Update all layers
-			for (Layer* layer : m_LayerStack)
+			for (Layer *layer : m_LayerStack)
 				layer->OnUpdate(timestep);
-			
-			Application* app = this;
-				Renderer::Submit([app]() { app->RenderImGui(); });
-			Renderer::WaitAndRender();	
+
+			Application *app = this;
+			Renderer::Submit([app]()
+							 { app->RenderImGui(); });
+			Renderer::WaitAndRender();
 			m_Window->OnUpdate();
 		}
 	}
@@ -66,25 +71,25 @@ namespace Janus {
 		m_Running = false;
 	}
 
-	void Application::PushLayer(Layer* layer)
+	void Application::PushLayer(Layer *layer)
 	{
 		m_LayerStack.PushLayer(layer);
 		layer->OnAttach();
 	}
 
-	void Application::PushOverlay(Layer* layer)
+	void Application::PushOverlay(Layer *layer)
 	{
 		m_LayerStack.PushOverlay(layer);
 		layer->OnAttach();
 	}
 
-	bool Application::OnWindowClose(WindowCloseEvent& e)
+	bool Application::OnWindowClose(WindowCloseEvent &e)
 	{
 		m_Running = false;
 		return true;
 	}
 
-	bool Application::OnWindowResize(WindowResizeEvent& e)
+	bool Application::OnWindowResize(WindowResizeEvent &e)
 	{
 		int width = e.GetWidth(), height = e.GetHeight();
 		if (width == 0 || height == 0)
@@ -94,9 +99,10 @@ namespace Janus {
 		}
 
 		m_Minimized = false;
-		Renderer::Submit([=]() { glViewport(0, 0, width, height); });
-		auto& fbs = FramebufferPool::GetGlobal()->GetAll();
-		for (auto& fb : fbs)
+		Renderer::Submit([=]()
+						 { glViewport(0, 0, width, height); });
+		auto &fbs = FramebufferPool::GetGlobal()->GetAll();
+		for (auto &fb : fbs)
 		{
 			fb->Resize(width, height);
 		}
@@ -107,9 +113,9 @@ namespace Janus {
 	void Application::RenderImGui()
 	{
 		m_ImGuiLayer->Begin();
-		for (Layer* layer : m_LayerStack)
+		for (Layer *layer : m_LayerStack)
 			layer->OnImGuiRender();
-		m_ImGuiLayer ->End();
+		m_ImGuiLayer->End();
 	}
 
 }

@@ -1,8 +1,11 @@
 #include "jnpch.h"
-#include "Log.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
 
-namespace Janus {
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+#include "Core/Log.h"
+
+namespace Janus
+{
 	std::shared_ptr<spdlog::logger> Log::s_ClientLogger;
 	std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
 

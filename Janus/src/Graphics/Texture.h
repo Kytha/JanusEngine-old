@@ -1,7 +1,12 @@
 #pragma once
+
 #include <string>
+
 #include "Core/Buffer.h"
-namespace Janus {
+#include "Core/stb_image/stb_image.h"
+
+namespace Janus
+{
     class Texture : public RefCounted
     {
     public:

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Core/Core.h"
-#include "FrameBuffer.h"
+#include "Graphics/FrameBuffer.h"
 
-namespace Janus {
+namespace Janus
+{
 
 	struct RenderPassSpecification
 	{
@@ -13,11 +14,12 @@ namespace Janus {
 	class RenderPass : public RefCounted
 	{
 	public:
-		RenderPass(const RenderPassSpecification& spec);
+		RenderPass(const RenderPassSpecification &spec);
 
-		RenderPassSpecification& GetSpecification() { return m_Specification; }
-		const RenderPassSpecification& GetSpecification() const { return m_Specification; }
-    private:
+		RenderPassSpecification &GetSpecification() { return m_Specification; }
+		const RenderPassSpecification &GetSpecification() const { return m_Specification; }
+
+	private:
 		RenderPassSpecification m_Specification;
 	};
 

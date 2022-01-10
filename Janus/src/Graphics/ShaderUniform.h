@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Core/Log.h"
-
 #include <string>
 #include <vector>
+
+#include "Core/Core.h"
+#include "Core/Log.h"
 
 class ShaderResourceDeclaration;
 class ShaderUniformBufferDeclaration;

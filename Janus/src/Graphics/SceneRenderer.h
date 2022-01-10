@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Scene/Scene.h"
 #include "Graphics/Mesh.h"
-#include "RenderPass.h"
-#include "Texture.h"
+#include "Graphics/RenderPass.h"
+#include "Graphics/Texture.h"
 
-namespace Janus {
+#include "Scene/Scene.h"
+
+namespace Janus
+{
 
 	struct SceneRendererOptions
 	{
@@ -13,7 +15,7 @@ namespace Janus {
 		bool ShowBoundingBoxes = false;
 	};
 
-    struct SceneRendererCamera
+	struct SceneRendererCamera
 	{
 		Janus::Camera Camera;
 		glm::mat4 ViewMatrix;
@@ -28,17 +30,17 @@ namespace Janus {
 
 		static void SetViewportSize(uint32_t width, uint32_t height);
 
-		static void BeginScene(const Scene* scene, const SceneRendererCamera& camera);
+		static void BeginScene(const Scene *scene, const SceneRendererCamera &camera);
 		static void EndScene();
 
-		static void SubmitMesh(Ref<Mesh> mesh, const glm::mat4& transform = glm::mat4(1.0f), Ref<MaterialInstance> overrideMaterial = nullptr);
+		static void SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform = glm::mat4(1.0f), Ref<MaterialInstance> overrideMaterial = nullptr);
 
 		//static Ref<RenderPass> GetFinalRenderPass();
 		static Ref<Framebuffer> GetFinalColorBuffer();
-		
+
 		// TODO: Temp
 		static uint32_t GetFinalColorBufferRendererID();
-		
+
 		//static void SetFocusPoint(const glm::vec2& point);
 
 		//static SceneRendererOptions& GetOptions();

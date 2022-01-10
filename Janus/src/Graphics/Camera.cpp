@@ -1,9 +1,11 @@
 #include "jnpch.h"
-#include "Camera.h"
 
-namespace Janus {
+#include "Graphics/Camera.h"
 
-	Camera::Camera(const glm::mat4& projectionMatrix)
+namespace Janus
+{
+
+	Camera::Camera(const glm::mat4 &projectionMatrix)
 		: m_ProjectionMatrix(projectionMatrix)
 	{
 	}

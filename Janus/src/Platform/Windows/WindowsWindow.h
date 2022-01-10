@@ -1,16 +1,17 @@
 #pragma once
 
 #include "Core/Window.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-
-namespace Janus {
+namespace Janus
+{
 	// Windows platform specific implementation of the window class
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowProps& props);
+		WindowsWindow(const WindowProps &props);
 		virtual ~WindowsWindow();
 
 		void OnUpdate() override;
@@ -20,17 +21,18 @@ namespace Janus {
 
 		// Window Attributes
 
-		inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+		inline void SetEventCallback(const EventCallbackFn &callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 
-		inline virtual void* GetNativeWindow() const { return m_Window; }
+		inline virtual void *GetNativeWindow() const { return m_Window; }
 
 	private:
-		virtual void Init(const WindowProps& props);
+		virtual void Init(const WindowProps &props);
 		virtual void Shutdown();
+
 	private:
-		GLFWwindow* m_Window;
+		GLFWwindow *m_Window;
 		//GraphicsContext* m_Context;
 
 		struct WindowData
@@ -43,6 +45,5 @@ namespace Janus {
 		};
 
 		WindowData m_Data;
-
 	};
 }

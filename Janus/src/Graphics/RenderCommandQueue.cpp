@@ -1,9 +1,10 @@
 #include "jnpch.h"
-#include "RenderCommandQueue.h"
+#include "Graphics/RenderCommandQueue.h"
 
 #define JN_RENDER_TRACE(...) HZ_CORE_TRACE(__VA_ARGS__)
 
-namespace Janus {
+namespace Janus
+{
 
 	RenderCommandQueue::RenderCommandQueue()
 	{
@@ -17,16 +18,16 @@ namespace Janus {
 		delete[] m_CommandBuffer;
 	}
 
-	void* RenderCommandQueue::Allocate(RenderCommandFn fn, uint32_t size)
+	void *RenderCommandQueue::Allocate(RenderCommandFn fn, uint32_t size)
 	{
 		// TODO: alignment
-		*(RenderCommandFn*)m_CommandBufferPtr = fn;
+		*(RenderCommandFn *)m_CommandBufferPtr = fn;
 		m_CommandBufferPtr += sizeof(RenderCommandFn);
 
-		*(uint32_t*)m_CommandBufferPtr = size;
+		*(uint32_t *)m_CommandBufferPtr = size;
 		m_CommandBufferPtr += sizeof(uint32_t);
 
-		void* memory = m_CommandBufferPtr;
+		void *memory = m_CommandBufferPtr;
 		m_CommandBufferPtr += size;
 
 		m_CommandCount++;
@@ -37,14 +38,14 @@ namespace Janus {
 	{
 		//HZ_RENDER_TRACE("RenderCommandQueue::Execute -- {0} commands, {1} bytes", m_CommandCount, (m_CommandBufferPtr - m_CommandBuffer));
 
-		byte* buffer = m_CommandBuffer;
+		byte *buffer = m_CommandBuffer;
 
 		for (uint32_t i = 0; i < m_CommandCount; i++)
 		{
-			RenderCommandFn function = *(RenderCommandFn*)buffer;
+			RenderCommandFn function = *(RenderCommandFn *)buffer;
 			buffer += sizeof(RenderCommandFn);
 
-			uint32_t size = *(uint32_t*)buffer;
+			uint32_t size = *(uint32_t *)buffer;
 			buffer += sizeof(uint32_t);
 			function(buffer);
 			buffer += size;

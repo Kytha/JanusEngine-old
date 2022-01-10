@@ -74,7 +74,6 @@ SET ( JANUS_HEADERS
     src/Platform/Windows/WindowsWindow.h
     src/Platform/Windows/WindowsInput.h
     src/ImGui/ImGuiLayer.h
-    src/ImGui/ImGui.h
   )
 
 ############################# DEPENDENCIES ###########################################
