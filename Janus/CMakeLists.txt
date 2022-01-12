@@ -26,9 +26,11 @@ SET ( JANUS_SOURCE
     src/Scene/Entity.cpp
     src/Scene/EditorCamera.cpp
     src/Scene/Scene.cpp
+    src/Scene/SceneHierarchyPanel.cpp
     src/Core/stb_image/stb_imageBuild.cpp
     src/Platform/Windows/WindowsWindow.cpp
     src/Platform/Windows/WindowsInput.cpp
+    src/Scene/InspectorPanel.cpp
     src/ImGui/ImGuiBuild.cpp
     src/ImGui/ImGuiLayer.cpp
   )
@@ -49,6 +51,7 @@ SET ( JANUS_HEADERS
     src/Core/Window.h
     src/Core/Application.h
     src/Core/UUID.h
+    src/Debug/Instrumentor.h
     src/Graphics/Shader.h
     src/Graphics/ShaderUniform.h
     src/Graphics/Texture.h
@@ -66,10 +69,12 @@ SET ( JANUS_HEADERS
     src/Graphics/SceneRenderer.h
     src/Graphics/RenderCommandQueue.h
     src/Graphics/Camera.h
-    src/Scene/Entity.h
     src/Scene/Scene.h
+    src/Scene/Entity.h
     src/Scene/EditorCamera.h
     src/Scene/Components.h
+    src/Scene/SceneHierarchyPanel.h
+    src/Scene/InspectorPanel.h
     src/Core/stb_image/stb_image.h
     src/Platform/Windows/WindowsWindow.h
     src/Platform/Windows/WindowsInput.h

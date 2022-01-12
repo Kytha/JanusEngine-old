@@ -1,28 +1,98 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "Core/Core.h"
+
+#include "Scene/Scene.h"
 #include "Graphics/Mesh.h"
+#include "Scene/Components.h"
 
 namespace Janus {
-class Entity
-{
-    public:
-        Entity();
-        ~Entity();
 
-        void SetMesh(const Ref<Mesh>& mesh) { m_Mesh = mesh; }
-        Ref<Mesh> GetMesh() { return m_Mesh; }
+	class Entity
+	{
+	public:
+		Entity() = default;
+		Entity(entt::entity handle, Scene* scene)
+			: m_EntityHandle(handle), m_Scene(scene) {}
 
-        void SetMaterial(const Ref<Material>& material) { m_Material = material; }
-        Ref<Material> GetMaterial() { return m_Material; }
+		~Entity() {}
 
-        const glm::mat4& GetTransform() const { return m_Transform; }
-        glm::mat4& Transform() { return m_Transform; }
-    private:
-        glm::mat4 m_Transform;
-        Ref<Mesh> m_Mesh;
-        Ref<Material> m_Material;
-    };
+		template<typename T, typename... Args>
+		T& AddComponent(Args&&... args)
+		{
+			JN_ASSERT(!HasComponent<T>(), "Entity already has component!");
+			return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+		}
+
+		template<typename T>
+		T& GetComponent()
+		{
+			JN_ASSERT(HasComponent<T>(), "Entity doesn't have component!");
+			return m_Scene->m_Registry.get<T>(m_EntityHandle);
+		}
+
+		template<typename T>
+		const T& GetComponent() const
+		{
+			JN_ASSERT(HasComponent<T>(), "Entity doesn't have component!");
+			return m_Scene->m_Registry.get<T>(m_EntityHandle);
+		}
+
+		template<typename T>
+		bool HasComponent()
+		{
+			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
+		}
+
+		template<typename T>
+		bool HasComponent() const
+		{
+			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
+		}
+
+		template<typename...T>
+		bool HasAny()
+		{
+			return m_Scene->m_Registry.any<T...>(m_EntityHandle);
+		}
+
+		template<typename...T>
+		bool HasAny() const
+		{
+			return m_Scene->m_Registry.any<T...>(m_EntityHandle);
+		}
+
+		template<typename T>
+		void RemoveComponent()
+		{
+			JN_ASSERT(HasComponent<T>(), "Entity doesn't have component!");
+			m_Scene->m_Registry.remove<T>(m_EntityHandle);
+		}
+
+		TransformComponent& Transform() { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
+		const glm::mat4& Transform() const { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle).GetTransform(); }
+
+		operator uint32_t () const { return (uint32_t)m_EntityHandle; }
+		operator entt::entity () const { return m_EntityHandle; }
+		operator bool () const { return (m_EntityHandle != entt::null) && m_Scene; }
+
+		bool operator==(const Entity& other) const
+		{
+			return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene;
+		}
+
+		bool operator!=(const Entity& other) const
+		{
+			return !(*this == other);
+		}
+
+		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
+		UUID GetSceneUUID() { return m_Scene->GetUUID(); }
+	private:
+		Entity(const std::string& name);
+	private:
+		entt::entity m_EntityHandle{ entt::null };
+		Scene* m_Scene = nullptr;
+        friend class Scene;
+	};
 }
-

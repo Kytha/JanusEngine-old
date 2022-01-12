@@ -146,8 +146,7 @@ namespace Janus
 			return Ref<T>(m_Textures[slot]);
 		}
 
-		template <typename T>
-		Ref<T> TryGetResource(const std::string &name)
+		Ref<Texture> TryGetResource (const std::string &name)
 		{
 			auto decl = m_Material->FindResourceDeclaration(name);
 			if (!decl)
@@ -157,7 +156,7 @@ namespace Janus
 			if (slot >= m_Textures.size())
 				return nullptr;
 
-			return Ref<T>(m_Textures[slot]);
+			return Ref<Texture>(m_Textures[slot]);
 		}
 		void Bind();
 
@@ -165,7 +164,7 @@ namespace Janus
 		bool GetFlag(MaterialFlag flag) const { return (uint32_t)flag & m_Material->m_MaterialFlags; }
 		void SetFlag(MaterialFlag flag, bool value = true);
 
-		Ref<Shader> GetShader() { return m_Material->m_Shader; }
+		Ref<Shader> GetShader() const { return m_Material->m_Shader; }
 
 		const std::string &GetName() const { return m_Name; }
 

@@ -26,6 +26,8 @@ namespace Janus
 
 	void Renderer::Init()
 	{
+		JN_PROFILE_FUNCTION();
+
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
@@ -98,6 +100,7 @@ namespace Janus
 
 	void Renderer::Clear(float r, float g, float b, float a)
 	{
+		
 		Renderer::Submit([=]()
 						 {
 							 glClearColor(r, g, b, a);
@@ -113,6 +116,7 @@ namespace Janus
 	{
 		Renderer::Submit([=]()
 						 {
+							 JN_PROFILE_FUNCTION();
 							 if (!depthTest)
 								 glDisable(GL_DEPTH_TEST);
 
@@ -141,11 +145,13 @@ namespace Janus
 
 	void Renderer::WaitAndRender()
 	{
+		JN_PROFILE_FUNCTION();
 		s_Data.m_CommandQueue.Execute();
 	}
 
 	void Renderer::BeginRenderPass(Ref<RenderPass> renderPass, bool clear)
 	{
+		JN_PROFILE_FUNCTION();
 		JN_ASSERT(renderPass, "RENDERER_ERROR: Render pass cannot be null!");
 		s_Data.m_ActiveRenderPass = renderPass;
 
@@ -163,6 +169,7 @@ namespace Janus
 
 	void Renderer::EndRenderPass()
 	{
+		JN_PROFILE_FUNCTION();
 		JN_ASSERT(s_Data.m_ActiveRenderPass, "RENDERER_ERROR: No active render pass! Have you called Renderer::EndRenderPass twice?");
 		s_Data.m_ActiveRenderPass->GetSpecification().TargetFramebuffer->Unbind();
 		s_Data.m_ActiveRenderPass = nullptr;
@@ -204,6 +211,7 @@ namespace Janus
 			shader->SetMat4("u_Transform", transform * submesh.Transform);
 			Renderer::Submit([submesh, material]()
 							 {
+								 JN_PROFILE_FUNCTION();
 								 if (material->GetFlag(MaterialFlag::DepthTest))
 									 glEnable(GL_DEPTH_TEST);
 								 else

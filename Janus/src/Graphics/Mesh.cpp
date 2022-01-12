@@ -224,6 +224,9 @@ namespace Janus
                     {
                         JN_CORE_ERROR("MESH_IMPORT_MSG: Could not load texture: {0}", texturePath);
                     }
+                } else {
+                    mi->Set("u_RoughnessTexToggle", 0.0f);
+                    mi->Set("u_Roughness", roughness);
                 }
                 bool metalnessTextureFound = false;
                 for (uint32_t i = 0; i < aiMaterial->mNumProperties; i++)

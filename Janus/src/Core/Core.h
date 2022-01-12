@@ -46,6 +46,7 @@ inline float Degrees(float rad) {
 }
 
 #include "Core/Ref.h"
+#include "Debug/Instrumentor.h"
 namespace Janus {
 
   template<typename T>

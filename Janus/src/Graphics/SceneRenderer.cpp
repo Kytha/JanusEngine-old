@@ -36,6 +36,7 @@ namespace Janus
 
     void SceneRenderer::Init()
     {
+        JN_PROFILE_FUNCTION();
         FramebufferSpecification geoFramebufferSpec;
         geoFramebufferSpec.Attachments = {FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth};
         geoFramebufferSpec.Samples = 1;
@@ -70,6 +71,7 @@ namespace Janus
 
     void SceneRenderer::BeginScene(const Scene *scene, const SceneRendererCamera &camera)
     {
+        JN_PROFILE_FUNCTION();
         JN_ASSERT(!s_Data.ActiveScene, "SCENE_RENDERER_ERROR: Cannot begin a new scene while a scene is still active!");
         s_Data.ActiveScene = scene;
         s_Data.sceneData.sceneCamera = camera;
@@ -78,6 +80,7 @@ namespace Janus
 
     void SceneRenderer::EndScene()
     {
+        JN_PROFILE_FUNCTION();
         JN_ASSERT(s_Data.ActiveScene, "SCENE_RENDERER_ERROR: Cannot end scene when there is no active scene!");
         s_Data.ActiveScene = nullptr;
         FlushDrawList();
@@ -91,6 +94,7 @@ namespace Janus
 
     void SceneRenderer::GeometryPass()
     {
+        JN_PROFILE_FUNCTION();
         Renderer::BeginRenderPass(s_Data.GeoPass);
 
         auto &sceneCamera = s_Data.sceneData.sceneCamera;

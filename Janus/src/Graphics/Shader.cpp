@@ -27,6 +27,13 @@ namespace Janus
 	Shader::Shader(const std::string &filepath)
 		: m_AssetPath(filepath)
 	{
+		JN_PROFILE_FUNCTION();
+
+		size_t found = filepath.find_last_of("/\\");
+		m_Name = found != std::string::npos ? filepath.substr(found + 1) : filepath;
+		found = m_Name.find_last_of(".");
+		m_Name = found != std::string::npos ? m_Name.substr(0, found) : m_Name;
+		
 		std::string source = ReadShaderFromFile(filepath);
 		m_ShaderSource = PreProcess(source);
 
@@ -131,6 +138,7 @@ namespace Janus
 
 	std::string Shader::ReadShaderFromFile(const std::string &filepath) const
 	{
+		JN_PROFILE_FUNCTION();
 		std::string code;
 		std::stringstream ss;
 		std::ifstream in;
@@ -153,6 +161,7 @@ namespace Janus
 
 	void Shader::Parse()
 	{
+		JN_PROFILE_FUNCTION();
 		const char *token;
 		const char *vstr;
 		const char *fstr;
@@ -192,6 +201,7 @@ namespace Janus
 
 	void Shader::ParseUniform(const std::string &statement, ShaderDomain domain)
 	{
+		JN_PROFILE_FUNCTION();
 		std::vector<std::string> tokens = Tokenize(statement);
 		uint32_t index = 0;
 
@@ -261,6 +271,7 @@ namespace Janus
 
 	void Shader::ParseUniformStruct(const std::string &block, ShaderDomain domain)
 	{
+		JN_PROFILE_FUNCTION();
 		std::vector<std::string> tokens = Tokenize(block);
 
 		uint32_t index = 0;
@@ -298,6 +309,7 @@ namespace Janus
 
 	void Shader::ResolveUniforms()
 	{
+		JN_PROFILE_FUNCTION();
 		glUseProgram(m_RendererID);
 
 		for (size_t i = 0; i < m_VSRendererUniformBuffers.size(); i++)
@@ -428,6 +440,7 @@ namespace Janus
 
 	void Shader::CompileAndUploadShader()
 	{
+		JN_PROFILE_FUNCTION();
 		// CODE COPIED FROM OPENGL WIKI
 		std::vector<GLuint> shaderRendererIDs;
 
@@ -693,7 +706,7 @@ namespace Janus
 	void Shader::Bind() const
 	{
 		Renderer::Submit([=]()
-						 { glUseProgram(m_RendererID); });
+						 { JN_PROFILE_FUNCTION(); glUseProgram(m_RendererID); });
 	}
 
 	void Shader::Unbind() const

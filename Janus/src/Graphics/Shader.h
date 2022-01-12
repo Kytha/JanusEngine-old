@@ -43,6 +43,7 @@ namespace Janus
 		void ResolveAndSetUniformArray(ShaderUniformDeclaration *uniform, Buffer buffer);
 		void ResolveAndSetUniformField(const ShaderUniformDeclaration &field, byte *data, int32_t offset);
 
+		const std::string& GetName() const { return m_Name; }
 		// Preprocess single source string into multiple shader sources
 
 		// Mapping of strings to shader types. Currently only supports "vertex" and "fragment"

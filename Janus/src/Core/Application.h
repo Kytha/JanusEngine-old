@@ -33,6 +33,7 @@ namespace Janus
 		inline static Application &Get() { return *s_Instance; }
 		ImGuiLayer *GetImGuiLayer() { return m_ImGuiLayer; }
 		void RenderImGui();
+		std::string Application::OpenFile(const char* filter) const;
 
 	private:
 		bool OnWindowClose(WindowCloseEvent &e);

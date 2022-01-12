@@ -1,5 +1,6 @@
 #include "janus.h"
 #include "imgui.h"
+#include <glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -16,10 +17,17 @@ class SceneSceneEditorLayer : public Janus::Layer
         SceneSceneEditorLayer()
             : Layer("Scene Editor"), m_EditorCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f))
         { 
+
+            
             m_Scene = Janus::Ref<Janus::Scene>::Create("Test Scene");
-            Janus::Entity* bust = m_Scene->CreateEntity();
+
+            m_SceneHierarchyPanel = Janus::CreateScope<Janus::SceneHierarchyPanel>(m_Scene);
+            m_InspectorPanel = Janus::CreateScope<Janus::InspectorPanel>(m_Scene);
+
+            m_SceneHierarchyPanel->SetSelectionChangedCallback(std::bind(&SceneSceneEditorLayer::SelectEntity, this, std::placeholders::_1));
             auto mesh = Janus::Ref<Janus::Mesh>::Create("./assets/marble_bust_01_4k.gltf");
-            bust->SetMesh(mesh);
+            Janus::Entity entity = m_Scene->CreateEntity("bust");
+            entity.AddComponent<Janus::MeshComponent>(mesh);
 
             Janus::Light light;
             light.Position = {1.0f, 5.0f, 0.0f};
@@ -31,7 +39,7 @@ class SceneSceneEditorLayer : public Janus::Layer
 
         void OnAttach()
         {
-
+            
         }
 
         void OnUpdate(Janus::Timestep ts) override
@@ -55,6 +63,15 @@ class SceneSceneEditorLayer : public Janus::Layer
         {
             m_EditorCamera.OnEvent(e);
         }
+
+        void SelectEntity(Janus::Entity entity)
+	    {
+            if (!entity)
+                return;
+            m_SelectionContext.clear();
+            m_SelectionContext.push_back(entity);
+            m_InspectorPanel->SetSelected(entity);
+	    }
 
         void OnImGuiRender() 
         {
@@ -159,7 +176,10 @@ class SceneSceneEditorLayer : public Janus::Layer
                     ImGui::EndMenuBar();
                 }
 
+            
             ImGui::End();
+            m_SceneHierarchyPanel->OnImGuiRender();
+            m_InspectorPanel->OnImGuiRender();
             
         }
 
@@ -275,6 +295,9 @@ class SceneSceneEditorLayer : public Janus::Layer
 
     private:
         Janus::Ref<Janus::Scene> m_Scene;
+        Janus::Scope<Janus::SceneHierarchyPanel> m_SceneHierarchyPanel;
+        Janus::Scope<Janus::InspectorPanel> m_InspectorPanel;
+        std::vector<Janus::Entity> m_SelectionContext;
         Janus::EditorCamera m_EditorCamera;
         bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };

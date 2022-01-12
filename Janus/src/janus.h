@@ -14,6 +14,8 @@
 #include "Core/Events/MouseEvent.h"
 #include "Core/UUID.h"
 
+#include "Debug/Instrumentor.h"
+
 #include "Graphics/Mesh.h"
 #include "Graphics/Texture.h"
 #include "Graphics/Shader.h"
@@ -32,5 +34,7 @@
 #include "Scene/EditorCamera.h"
 #include "Scene/Scene.h"
 #include "Scene/Components.h"
+#include "Scene/SceneHierarchyPanel.h"
+#include "Scene/InspectorPanel.h"
 
 #include "Core/EntryPoint.h"

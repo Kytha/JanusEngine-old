@@ -3,10 +3,13 @@
 #include "Core/Core.h"
 #include "Scene/EditorCamera.h"
 #include "Graphics/Light.h"
-#include "Entity.h"
 #include <string>
-
+#include "entt/entt.hpp"
+#include "Core/UUID.h"
 namespace Janus {
+
+    class Entity;
+    using EntityMap = std::unordered_map<UUID, Entity>;
     class Scene : public RefCounted
     {
     public:
@@ -19,13 +22,30 @@ namespace Janus {
 
         inline void SetLight(const Light& light) {m_Light = light;}
         inline Light& GetLight() { return m_Light; }
-        void AddEntity(Entity* entity);
-        Entity* CreateEntity();
+
+        UUID GetUUID() const { return m_SceneID; }
+		Entity CreateEntity(const std::string& name = "");
+		Entity CreateEntityWithID(UUID uuid, const std::string& name = "", bool runtimeMap = false);
+		void DestroyEntity(Entity entity);
+
+        Entity FindEntityByTag(const std::string& tag);
+		Entity FindEntityByUUID(UUID id);
+
+        const EntityMap& GetEntityMap() const { return m_EntityIDMap; }
+
         Light m_Light;
+    public:
+        static Ref<Scene> CreateEmpty();
     private:
+        UUID m_SceneID;
         std::string m_DebugName;
-        std::vector<Entity*> m_Entities;
         float m_LightMultiplier = 0.3f;
+        entt::entity m_SceneEntity;
+		entt::registry m_Registry;
+        EntityMap m_EntityIDMap;
+
+        friend class Entity;
+        friend class SceneHierarchyPanel;
     };
 }
 

@@ -51,7 +51,7 @@ namespace Janus
     {
         Ref<const VertexBuffer> instance = this;
         Renderer::Submit([instance]()
-                         { glBindBuffer(GL_ARRAY_BUFFER, instance->m_RendererID); });
+                         { JN_PROFILE_FUNCTION(); glBindBuffer(GL_ARRAY_BUFFER, instance->m_RendererID); });
     }
 
     void VertexBuffer::Unbind()
