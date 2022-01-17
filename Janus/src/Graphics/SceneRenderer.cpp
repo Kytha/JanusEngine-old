@@ -14,6 +14,8 @@ namespace Janus
         struct SceneInfo
         {
             SceneRendererCamera sceneCamera;
+            float SceneEnvironmentIntensity;
+            Ref<MaterialInstance> SkyboxMaterial;
             Light ActiveLight;
 
         } sceneData;
@@ -75,6 +77,8 @@ namespace Janus
         JN_ASSERT(!s_Data.ActiveScene, "SCENE_RENDERER_ERROR: Cannot begin a new scene while a scene is still active!");
         s_Data.ActiveScene = scene;
         s_Data.sceneData.sceneCamera = camera;
+        s_Data.sceneData.SkyboxMaterial = scene->m_SkyboxMaterial;
+        s_Data.sceneData.SceneEnvironmentIntensity = scene->m_EnvironmentIntensity;
         s_Data.sceneData.ActiveLight = scene->m_Light;
     }
 
@@ -100,6 +104,11 @@ namespace Janus
         auto &sceneCamera = s_Data.sceneData.sceneCamera;
         auto viewProjection = sceneCamera.Camera.GetProjectionMatrix() * sceneCamera.ViewMatrix;
         glm::vec3 cameraPosition = glm::inverse(s_Data.sceneData.sceneCamera.ViewMatrix)[3];
+
+		auto skyboxShader = s_Data.sceneData.SkyboxMaterial->GetShader();
+		s_Data.sceneData.SkyboxMaterial->Set("u_InverseVP", glm::inverse(viewProjection));
+		s_Data.sceneData.SkyboxMaterial->Set("u_SkyIntensity", s_Data.sceneData.SceneEnvironmentIntensity);
+		Renderer::SubmitFullscreenQuad(s_Data.sceneData.SkyboxMaterial);
 
         for (auto &dc : s_Data.DrawList)
         {
@@ -141,4 +150,67 @@ namespace Janus
     {
         return s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetColorAttachmentRendererID();
     }
+
+    static Ref<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;
+    std::pair<Ref<TextureCube>, Ref<TextureCube>> SceneRenderer::CreateEnvironmentMap(const std::string& filepath)
+	{
+		const uint32_t cubemapSize = 2048;
+		const uint32_t irradianceMapSize = 32;
+
+		Ref<TextureCube> envUnfiltered = Ref<TextureCube>::Create(TextureFormat::Float16, cubemapSize, cubemapSize);
+		if (!equirectangularConversionShader)
+			equirectangularConversionShader = Ref<Shader>::Create("assets/shaders/janus_EquirectangularToCubeMap.glsl");
+		Ref<Texture> envEquirect = Ref<Texture>::Create(filepath);
+		//JN_ASSERT(envEquirect->GetFormat() == TextureFormat::Float16, "Texture is not HDR!");
+
+		equirectangularConversionShader->Bind();
+		envEquirect->Bind();
+		Renderer::Submit([envUnfiltered, cubemapSize, envEquirect]()
+			{
+				glBindImageTexture(0, envUnfiltered->GetRendererID(), 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+				glDispatchCompute(cubemapSize / 32, cubemapSize / 32, 6);
+				glGenerateTextureMipmap(envUnfiltered->GetRendererID());
+			});
+
+		if (!envFilteringShader)
+			envFilteringShader = Ref<Shader>::Create("assets/shaders/janus_EnvironmentMipFilter.glsl");
+
+		Ref<TextureCube> envFiltered = Ref<TextureCube>::Create(TextureFormat::Float16, cubemapSize, cubemapSize);
+
+		Renderer::Submit([envUnfiltered, envFiltered]()
+			{
+				glCopyImageSubData(envUnfiltered->GetRendererID(), GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+					envFiltered->GetRendererID(), GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+					envFiltered->GetWidth(), envFiltered->GetHeight(), 6);
+			});
+
+		envFilteringShader->Bind();
+		envUnfiltered->Bind();
+
+		Renderer::Submit([envUnfiltered, envFiltered, cubemapSize]() {
+			const float deltaRoughness = 1.0f / glm::max((float)(envFiltered->GetMipLevelCount() - 1.0f), 1.0f);
+			for (int level = 1, size = cubemapSize / 2; level < envFiltered->GetMipLevelCount(); level++, size /= 2) // <= ?
+			{
+				const GLuint numGroups = glm::max(1, size / 32);
+				glBindImageTexture(0, envFiltered->GetRendererID(), level, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+				glProgramUniform1f(envFilteringShader->GetRendererID(), 0, level * deltaRoughness);
+				glDispatchCompute(numGroups, numGroups, 6);
+			}
+			});
+
+		if (!envIrradianceShader)
+			envIrradianceShader = Ref<Shader>::Create("assets/shaders/janus_EnvironmentIrradiance.glsl");
+
+		Ref<TextureCube> irradianceMap = Ref<TextureCube>::Create(TextureFormat::Float16, irradianceMapSize, irradianceMapSize);
+		envIrradianceShader->Bind();
+		envFiltered->Bind();
+		Renderer::Submit([irradianceMap]()
+			{
+				glBindImageTexture(0, irradianceMap->GetRendererID(), 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+				glDispatchCompute(irradianceMap->GetWidth() / 32, irradianceMap->GetHeight() / 32, 6);
+				glGenerateTextureMipmap(irradianceMap->GetRendererID());
+			});
+
+		return { envFiltered, irradianceMap };
+	}
 }

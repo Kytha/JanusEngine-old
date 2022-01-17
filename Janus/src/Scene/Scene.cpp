@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Scene/Entity.h"
+#include "Graphics/Renderer.h"
 namespace Janus {
     Scene::Scene(const std::string& debugName)
         : m_DebugName(debugName)
@@ -20,32 +21,19 @@ namespace Janus {
 
     void Scene::Init()
     {
-
+		auto skyboxShader = Renderer::GetShaderLibrary()->Get("janus_skybox");
+		m_SkyboxMaterial = MaterialInstance::Create(Material::Create(skyboxShader));
+		m_SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
+		m_Environment = Environment::Load("assets/env/pink_sunrise_4k.hdr");
     }
 
     void Scene::OnUpdate(Timestep ts, EditorCamera& editorCamera)
     {
         JN_PROFILE_FUNCTION();
         glEnable(GL_DEPTH_TEST);
-        // Render entities
-        /*
-        auto view = m_Registry.view<TransformComponent>();
-        for (auto entity : view)
-        {
-            auto& transformComponent = view.get(entity);
-            Entity e = Entity(entity, this);
-            glm::mat4 transform = e.Transform().GetTransform();
-            glm::vec3 translation;
-			glm::vec3 rotation;
-			glm::vec3 scale;
-            Math::DecomposeTransform(transform, translation, rotation, scale);
-            glm::quat rotationQuat = glm::quat(rotation);
-            transformComponent.Up = glm::normalize(glm::rotate(rotationQuat, glm::vec3(0.0f, 1.0f, 0.0f)));
-            transformComponent.Right = glm::normalize(glm::rotate(rotationQuat, glm::vec3(1.0f, 0.0f, 0.0f)));
-            transformComponent.Forward = glm::normalize(glm::rotate(rotationQuat, glm::vec3(0.0f, 0.0f, -1.0f)));
-        }
-        */
 
+		m_SkyboxMaterial->Set("u_TextureLod", m_SkyboxLod);
+		SetSkybox(m_Environment.RadianceMap);
         SceneRenderer::BeginScene(this, { editorCamera, editorCamera.GetViewMatrix(), 0.1f, 1000.0f, 45.0f });
         auto group = m_Registry.group<MeshComponent>(entt::get<TransformComponent>);
         for (auto entity : group)
@@ -130,6 +118,12 @@ namespace Janus {
     Ref<Scene> Scene::CreateEmpty()
 	{
 		return new Scene("Empty");
+	}
+
+	void Scene::SetSkybox(const Ref<TextureCube>& skybox)
+	{
+		m_SkyboxTexture = skybox;
+		m_SkyboxMaterial->Set("u_Texture", skybox);
 	}
 }
 

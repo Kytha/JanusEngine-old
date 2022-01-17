@@ -38,6 +38,8 @@ namespace Janus
 		//static Ref<RenderPass> GetFinalRenderPass();
 		static Ref<Framebuffer> GetFinalColorBuffer();
 
+		static std::pair<Ref<TextureCube>, Ref<TextureCube>> CreateEnvironmentMap(const std::string& filepath);
+
 		// TODO: Temp
 		static uint32_t GetFinalColorBufferRendererID();
 

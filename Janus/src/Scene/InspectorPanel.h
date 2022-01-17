@@ -24,6 +24,5 @@ namespace Janus {
 	private:
 		Ref<Scene> m_Context;
 		Entity m_SelectionContext;
-        Ref<Texture> m_CheckerboardTex;
 	};
 }

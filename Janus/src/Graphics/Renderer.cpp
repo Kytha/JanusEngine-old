@@ -50,6 +50,7 @@ namespace Janus
 		s_Data.m_ShaderLibrary = Ref<ShaderLibrary>::Create();
 		Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_pbr.glsl", "janus_pbr");
 		Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_grid.glsl", "janus_grid");
+		Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_skybox.glsl", "janus_skybox");
 		//Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_quad.glsl", "janus_quad");
 		SceneRenderer::Init();
 		float x = -1;

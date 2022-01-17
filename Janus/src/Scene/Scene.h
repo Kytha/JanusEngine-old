@@ -2,10 +2,13 @@
 #pragma once
 #include "Core/Core.h"
 #include "Scene/EditorCamera.h"
+#include "Graphics/Texture.h"
+#include "Graphics/Material.h"
 #include "Graphics/Light.h"
 #include <string>
 #include "entt/entt.hpp"
 #include "Core/UUID.h"
+#include "Graphics/Environment.h"
 namespace Janus {
 
     class Entity;
@@ -32,6 +35,7 @@ namespace Janus {
 		Entity FindEntityByUUID(UUID id);
 
         const EntityMap& GetEntityMap() const { return m_EntityIDMap; }
+        void SetSkybox(const Ref<TextureCube>& skybox);
 
         Light m_Light;
     public:
@@ -43,8 +47,14 @@ namespace Janus {
         entt::entity m_SceneEntity;
 		entt::registry m_Registry;
         EntityMap m_EntityIDMap;
+        Ref<TextureCube> m_SkyboxTexture;
+        Ref<MaterialInstance> m_SkyboxMaterial;
+        Environment m_Environment;
+        float m_SkyboxLod = 0.1f;
+        float m_EnvironmentIntensity = 1.0f;
 
         friend class Entity;
+        friend class SceneRenderer;
         friend class SceneHierarchyPanel;
     };
 }

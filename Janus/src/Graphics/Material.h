@@ -113,6 +113,11 @@ namespace Janus
 			m_OverriddenValues.insert(name);
 		}
 
+		void Set(const std::string& name, const Ref<TextureCube>& texture)
+		{
+			Set(name, (const Ref<Texture>&)texture);
+		}
+
 		void Set(const std::string &name, const Ref<Texture> &texture)
 		{
 			auto decl = m_Material->FindResourceDeclaration(name);

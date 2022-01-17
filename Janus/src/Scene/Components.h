@@ -75,4 +75,27 @@ namespace Janus {
 
 		operator Ref<Janus::Mesh> () { return Mesh; }
 	};
+
+	struct DirectionalLightComponent
+	{
+		glm::vec3 Radiance = { 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+		bool CastShadows = true;
+		bool SoftShadows = true;
+	};
+
+	struct PointLightComponent
+	{
+		glm::vec3 Radiance = { 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+		bool CastsShadows = true;
+		bool SoftShadows = true;
+		float Falloff = 1.f;
+	};
+	struct SkyLightComponent
+	{
+		Environment SceneEnvironment;
+		float Intensity = 1.0f;
+		float Angle = 0.0f;
+	};
 }

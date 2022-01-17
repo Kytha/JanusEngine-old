@@ -3,7 +3,6 @@
 
 #include <imgui.h>
 #include "imgui_internal.h"
-
 namespace Janus {
    	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 		: m_Context(context)
@@ -26,7 +25,7 @@ namespace Janus {
 	void SceneHierarchyPanel::OnImGuiRender(bool window)
 	{
         if (window)
-		    ImGui::Begin("Scene Hierarchy");
+		ImGui::Begin("Scene Hierarchy");
         ImRect windowRect = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
         if (m_Context)
         {
@@ -36,7 +35,7 @@ namespace Janus {
             }
         }
         if (window)
-			ImGui::End();
+		ImGui::End();
     }
 
 
@@ -79,4 +78,5 @@ namespace Janus {
             ImGui::TreePop();
         }
     }
+
 }

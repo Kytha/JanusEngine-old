@@ -489,7 +489,7 @@ namespace Janus
 			// The maxLength includes the NULL character
 			std::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
-			std::cout << "ERROR::SHADER::SHADER LINKING FAIL" << std::endl;
+			std::cout << "ERROR::SHADER::SHADER LINKING FAIL" << m_Name << std::endl;
 
 			// We don't need the program anymore.
 			glDeleteProgram(program);
@@ -533,7 +533,8 @@ namespace Janus
 			return GL_VERTEX_SHADER;
 		if (type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
-
+		if (type == "compute")
+			return GL_COMPUTE_SHADER;
 		return GL_NONE;
 	}
 
@@ -559,6 +560,11 @@ namespace Janus
 
 			// Add everything between inital position and jump to map as a new shader program
 			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+			if (ShaderTypeFromString(type) == GL_COMPUTE_SHADER)
+			{
+				m_IsCompute = true;
+				break;
+			}
 		}
 		return shaderSources;
 	}
