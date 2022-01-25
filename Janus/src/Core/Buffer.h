@@ -38,6 +38,20 @@ struct Buffer
         Size = size;
     }
 
+    template<typename T>
+    T& Read(uint32_t offset = 0)
+    {
+        return *(T*)((byte*)Data + offset);
+    }
+
+    byte* ReadBytes(uint32_t size, uint32_t offset)
+    {
+        JN_ASSERT(offset + size <= Size, "Buffer overflow!");
+        byte* buffer = new byte[size];
+        memcpy(buffer, (byte*)Data + offset, size);
+        return buffer;
+    }
+
     void ZeroInitialize()
     {
         if (Data)

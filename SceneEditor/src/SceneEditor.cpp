@@ -25,7 +25,7 @@ class SceneSceneEditorLayer : public Janus::Layer
             m_InspectorPanel = Janus::CreateScope<Janus::InspectorPanel>(m_Scene);
 
             m_SceneHierarchyPanel->SetSelectionChangedCallback(std::bind(&SceneSceneEditorLayer::SelectEntity, this, std::placeholders::_1));
-            auto mesh = Janus::Ref<Janus::Mesh>::Create("./assets/marble_bust_01_4k.gltf");
+            auto mesh = Janus::Ref<Janus::Mesh>::Create("./assets/tg1lch1fa_LOD0.fbx");
             Janus::Entity entity = m_Scene->CreateEntity("bust");
             entity.AddComponent<Janus::MeshComponent>(mesh);
 
@@ -53,7 +53,7 @@ class SceneSceneEditorLayer : public Janus::Layer
                 m_EditorCamera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), m_ViewportSize.x, m_ViewportSize.y, 0.1f, 1000.0f));
 		    }
             
-            if (m_ViewportFocused && m_AllowViewportCameraEvents) {
+            if (m_AllowViewportCameraEvents) {
 				m_EditorCamera.OnUpdate(ts);
             }
             m_Scene->OnUpdate(ts, m_EditorCamera);
@@ -117,9 +117,17 @@ class SceneSceneEditorLayer : public Janus::Layer
                 style.WindowMinSize.x = minWinSizeX;
                 
                 ImGui::Begin("Environment");
-                
-                float skyboxLod;
-                ImGui::SliderFloat("Skybox LOD", &skyboxLod, 0.0f, 11.0f);
+
+                if(ImGui::Button("Load Skybox")){
+                    std::string filename = Janus::Application::Get().OpenFile("");
+                    if (filename != "")
+                    {
+                        m_Scene->SetEnvironmentMap(Janus::Environment::Load(filename));
+                    }
+                }
+
+
+                ImGui::SliderFloat("Skybox LOD", &m_Scene->GetSkyboxLOD(), 0.0f, 11.0f);
 
                 ImGui::Columns(2);
                 ImGui::AlignTextToFramePadding();
@@ -213,60 +221,110 @@ class SceneSceneEditorLayer : public Janus::Layer
                                 if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
                                 {
                                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); 
-                                    bool useAlbedoMap = true;
-                                    glm::vec3 albedoColor = {1.0,0.0,0.0};
+                                    float albedoTexToggle = material->Get<float>("u_AlbedoTexToggle");
+                                    bool useAlbedoMap = albedoTexToggle > 0; 
+                                    glm::vec3 albedoColor = material->Get<glm::vec3>("u_AlbedoColor");
                                     //auto& albedoColor = material->GetVector3("u_MaterialUniforms.AlbedoColor");
                                     Janus::Ref<Janus::Texture> albedoMap = material->TryGetResource("u_AlbedoTexture");
                                     if(albedoMap)
                                         ImGui::Image((void*)albedoMap->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+                                    else {
+                                        ImGui::Image((void*)m_CheckerboardTex->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+                                    }
                                     ImGui::PopStyleVar();
 
+                                    if (ImGui::IsItemClicked())
+                                    {
+                                        std::string filename = Janus::Application::Get().OpenFile("");
+                                        if (filename != "")
+                                        {
+                                            albedoMap = Janus::Ref<Janus::Texture>::Create(filename);
+                                            material->Set("u_AlbedoTexture", albedoMap);
+                                            material->Set("u_AlbedoTexToggle", 1.0f);
+                                        }
+                                    }
+                                    
                                     ImGui::SameLine();
                                     ImGui::BeginGroup();
                                     ImGui::Checkbox("Use##AlbedoMap", &useAlbedoMap);
+                                    if(useAlbedoMap) {
+                                        material->Set("u_AlbedoTexToggle", 1.0f);
+                                    } else {
+                                        material->Set("u_AlbedoTexToggle", 0.0f);
+                                    };
+                                    
                                     ImGui::EndGroup();
                                     ImGui::SameLine();
-                                    ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(albedoColor), ImGuiColorEditFlags_NoInputs);
+                                    if(ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(albedoColor), ImGuiColorEditFlags_NoInputs)) {
+                                        material->Set("u_AlbedoColor", albedoColor);
+                                    }
                                 }
 
                                 if (ImGui::CollapsingHeader("Normals", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
                                 {
                                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); 
-                                    bool useAlbedoMap = true;
                                     Janus::Ref<Janus::Texture> normalMap = material->TryGetResource("u_NormalTexture");
                                     if(normalMap)
                                         ImGui::Image((void*)normalMap->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+                                    else {
+                                        ImGui::Image((void*)m_CheckerboardTex->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+                                    }
                                     ImGui::PopStyleVar();
+
+                                    if (ImGui::IsItemClicked())
+                                    {
+                                        std::string filename = Janus::Application::Get().OpenFile("");
+                                        if (filename != "")
+                                        {
+                                            normalMap = Janus::Ref<Janus::Texture>::Create(filename);
+                                            material->Set("u_NormalTexture", normalMap);
+                                            material->Set("u_NormalTexToggle", 1.0f);
+                                        }
+                                    }
                                 }
 
                                 if(ImGui::CollapsingHeader("Metalness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
                                 {
                                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); 
-                                    bool useMetalnessMap = false;
+
+                                    float metalnessTexToggle = material->Get<float>("u_MetalnessTexToggle");
+                                    bool useMetalnessMap = metalnessTexToggle > 0; 
+
                                     Janus::Ref<Janus::Texture> metalnessMap = material->TryGetResource("u_MetalnessTexture");
                                     if(metalnessMap)
                                         ImGui::Image((void*)metalnessMap->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                                     else {
                                         ImGui::Image((void*)m_CheckerboardTex->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                                     }
-                                    float metalness = 0.5;
+                                    float metalness = material->Get<float>("u_Metalness");
                                     ImGui::PopStyleVar();
                                     ImGui::SameLine();
+
                                     ImGui::Checkbox("Use##MetalnessMap", &useMetalnessMap);
+
+                                    if(useMetalnessMap) {
+                                        material->Set("u_MetalnessTexToggle", 1.0);
+                                    } else {
+                                        material->Set("u_MetalnessTexToggle", 0.0);
+                                    }
                                     ImGui::SameLine();
-                                    ImGui::SliderFloat("Value##MetalnessInput", &metalness, 0.0f, 1.0f);
+                                    if(ImGui::SliderFloat("Value##MetalnessInput", &metalness, 0.0f, 1.0f)) {
+                                        material->Set("u_Metalness", metalness);
+                                    }
                                 }
                                 if(ImGui::CollapsingHeader("Roughness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
                                 {
                                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); 
-                                    bool useRoughnessMap = false;
+                                    float roughnessTexToggle = material->Get<float>("u_RoughnessTexToggle");
+                                    bool useRoughnessMap = roughnessTexToggle > 0; 
+
                                     Janus::Ref<Janus::Texture> roughnessMap = material->TryGetResource("u_RoughnessTexture");
                                     if(roughnessMap)
                                         ImGui::Image((void*)roughnessMap->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                                     else {
                                         ImGui::Image((void*)m_CheckerboardTex->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                                     }
-                                    float roughness = 0.5;
+                                    float roughness = material->Get<float>("u_Roughness");
                                     ImGui::PopStyleVar();
 
                                     if (ImGui::IsItemClicked())
@@ -281,8 +339,15 @@ class SceneSceneEditorLayer : public Janus::Layer
                                     }
                                     ImGui::SameLine();
                                     ImGui::Checkbox("Use##RoughnessMap", &useRoughnessMap);
+                                    if(useRoughnessMap) {
+                                        material->Set("u_RoughnessTexToggle", 1.0f);
+                                    } else {
+                                        material->Set("u_RoughnessTexToggle", 0.0f);
+                                    }
                                     ImGui::SameLine();
-                                    ImGui::SliderFloat("Value##RoughnessInput", &roughness, 0.0f, 1.0f);
+                                    if(ImGui::SliderFloat("Value##RoughnessInput", &roughness, 0.0f, 1.0f)) {
+                                        material->Set("u_Roughness", roughness);
+                                    }
                                 }
                             }
                         }

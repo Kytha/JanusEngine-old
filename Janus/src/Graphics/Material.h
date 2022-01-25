@@ -163,6 +163,18 @@ namespace Janus
 
 			return Ref<Texture>(m_Textures[slot]);
 		}
+
+		Ref<TextureCube> TryGetTextureCube (const std::string &name)
+		{
+			auto decl = m_Material->FindResourceDeclaration(name);
+			if (!decl)
+				return nullptr;
+
+			uint32_t slot = decl->GetRegister();
+			if (slot >= m_Textures.size())
+				return nullptr;	
+			return Ref<TextureCube>(m_Textures[slot]);
+		}
 		void Bind();
 
 		uint32_t GetFlags() const { return m_Material->m_MaterialFlags; }

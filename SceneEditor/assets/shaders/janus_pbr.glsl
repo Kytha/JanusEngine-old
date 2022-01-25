@@ -137,7 +137,7 @@ vec3 Lighting(vec3 F0) {
 
         float distance = length(u_Lights.Position - vs_Input.WorldPosition);
         float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = u_Lights.Radiance * u_Lights.Irradiance * attenuation;
+        vec3 radiance = u_Lights.Radiance * 20 * u_Lights.Irradiance * attenuation;
 
         float NDF = DistributionGGX(m_Params.Normal,H,m_Params.Roughness);
         float G = GeometrySmith(m_Params.Normal,m_Params.View,L, m_Params.Roughness);

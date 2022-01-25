@@ -168,7 +168,7 @@ namespace Janus
 			}
 			faceIndex++;
 		}
-
+		
 		Ref<TextureCube> instance = this;
 		Renderer::Submit([instance, faceWidth, faceHeight, faces]() mutable
 		{

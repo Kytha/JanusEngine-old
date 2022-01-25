@@ -55,13 +55,14 @@ namespace Janus
 		{
 			return m_RendererID == ((TextureCube&)other).m_RendererID;
 		}
-	private:
 		uint32_t m_RendererID;
+		
+	private:
 		TextureFormat m_Format;
 		uint32_t m_Width, m_Height;
 
 		unsigned char* m_ImageData;
-
+		
 		std::string m_FilePath;
 	};
 }
