@@ -17,6 +17,7 @@ namespace Janus
 		RenderCommandQueue m_CommandQueue;
 		Ref<ShaderLibrary> m_ShaderLibrary;
 
+		Ref<TextureCube> BlackCubeTexture;
 		Ref<VertexBuffer> m_FullscreenQuadVertexBuffer;
 		Ref<IndexBuffer> m_FullscreenQuadIndexBuffer;
 		Ref<Pipeline> m_FullscreenQuadPipeline;
@@ -53,6 +54,11 @@ namespace Janus
 		Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_skybox.glsl", "janus_skybox");
 		//Renderer::GetShaderLibrary()->Load("./assets/shaders/janus_quad.glsl", "janus_quad");
 		SceneRenderer::Init();
+
+
+		uint32_t blackCubeTextureData[6] = { 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000 };
+		s_Data.BlackCubeTexture = Ref<TextureCube>::Create(TextureFormat::RGBA, 1, 1, &blackCubeTextureData);
+
 		float x = -1;
 		float y = -1;
 		float width = 2, height = 2;
@@ -247,5 +253,10 @@ namespace Janus
 	RenderCommandQueue &Renderer::GetRenderCommandQueue()
 	{
 		return s_Data.m_CommandQueue;
+	}
+
+	Ref<TextureCube> Renderer::GetBlackCubeTexture()
+	{
+		return s_Data.BlackCubeTexture;
 	}
 }

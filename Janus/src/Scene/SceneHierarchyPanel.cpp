@@ -33,7 +33,16 @@ namespace Janus {
 			{
                 DrawEntityNode({ entity, m_Context.Raw() });
             }
+			if (ImGui::BeginPopupContextItem()) {
+				if (ImGui::BeginMenu("Create")) {
+					if (ImGui::MenuItem("Empty Entity")) {
+						auto newEntity = m_Context->CreateEntity("Empty Entity");
+						SetSelected(newEntity);
+					}
+				}
+			}
         }
+
         if (window)
 		ImGui::End();
     }

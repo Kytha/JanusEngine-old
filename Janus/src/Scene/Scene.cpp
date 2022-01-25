@@ -24,7 +24,6 @@ namespace Janus {
 		auto skyboxShader = Renderer::GetShaderLibrary()->Get("janus_skybox");
 		m_SkyboxMaterial = MaterialInstance::Create(Material::Create(skyboxShader));
 		m_SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
-		m_Environment = Environment::Load("assets/env/pink_sunrise_4k.hdr");
     }
 
     void Scene::OnUpdate(Timestep ts, EditorCamera& editorCamera)
@@ -32,8 +31,23 @@ namespace Janus {
         JN_PROFILE_FUNCTION();
         glEnable(GL_DEPTH_TEST);
 
+
+
+		auto lights = m_Registry.group<SkyLightComponent>(entt::get<TransformComponent>);
+		for(auto entity: lights) {
+			auto [transformComponent, skyLightComponent] = lights.get<TransformComponent, SkyLightComponent>(entity);
+			m_Environment = skyLightComponent.SceneEnvironment;
+			m_EnvironmentIntensity = skyLightComponent.Intensity;
+			m_SkyboxLod = skyLightComponent.LOD;
+		}
+		if(lights.empty() || !m_Environment)
+		{
+			m_Environment = Ref<Environment>::Create(Renderer::GetBlackCubeTexture(), Renderer::GetBlackCubeTexture());
+		}
+
+		SetSkybox(m_Environment->RadianceMap);
 		m_SkyboxMaterial->Set("u_TextureLod", m_SkyboxLod);
-		SetSkybox(m_Environment.RadianceMap);
+		
         SceneRenderer::BeginScene(this, { editorCamera, editorCamera.GetViewMatrix(), 0.1f, 1000.0f, 45.0f });
         auto group = m_Registry.group<MeshComponent>(entt::get<TransformComponent>);
         for (auto entity : group)

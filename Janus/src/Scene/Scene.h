@@ -35,7 +35,7 @@ namespace Janus {
 		Entity FindEntityByUUID(UUID id);
 
         const EntityMap& GetEntityMap() const { return m_EntityIDMap; }
-        void SetEnvironmentMap(Environment environment) {m_Environment = environment;}
+        void SetEnvironmentMap(Ref<Environment> environment) {m_Environment = environment;}
         float& GetSkyboxLOD() {return m_SkyboxLod;}
         void SetSkybox(const Ref<TextureCube>& skybox);
 
@@ -51,7 +51,7 @@ namespace Janus {
 		entt::registry m_Registry;
         EntityMap m_EntityIDMap;
         Ref<TextureCube> m_SkyboxTexture;
-        Environment m_Environment;
+        Ref<Environment> m_Environment;
         float m_SkyboxLod = 0.1f;
         float m_EnvironmentIntensity = 1.0f;
 

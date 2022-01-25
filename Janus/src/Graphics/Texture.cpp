@@ -19,6 +19,17 @@ namespace Janus
 		return 0;
 	}
 
+	inline GLenum OpenGLFormatDataType(TextureFormat format)
+	{
+		switch (format)
+		{
+			case TextureFormat::RGB:
+			case TextureFormat::RGBA:    return GL_UNSIGNED_BYTE;
+		}
+		return 0;
+	}
+
+
     uint32_t Texture::CalculateMipMapCount(uint32_t width, uint32_t height)
 	{
 		uint32_t levels = 1;
@@ -89,6 +100,32 @@ namespace Janus
         Renderer::Submit([instance, slot]() mutable
                          { glBindTextureUnit(slot, instance->m_RendererID); });
     }
+
+	TextureCube::TextureCube(TextureFormat format, uint32_t width, uint32_t height, void* data)
+		: m_Width(width), m_Height(height), m_Format(format)
+	{
+		if (data)
+		{
+			uint32_t size = width * height * 4 * 6; // six layers
+			m_LocalStorage = Buffer::Copy(data, size);
+		}
+
+		uint32_t levels = Texture::CalculateMipMapCount(width, height);
+		Ref<TextureCube> instance = this;
+		Renderer::Submit([instance, levels]() mutable
+		{
+			glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &instance->m_RendererID);
+			glTextureStorage2D(instance->m_RendererID, levels, JanusToOpenGLTextureFormat(instance->m_Format), instance->m_Width, instance->m_Height);
+			if (instance->m_LocalStorage.Data)
+				glTextureSubImage3D(instance->m_RendererID, 0, 0, 0, 0, instance->m_Width, instance->m_Height, 6, JanusToOpenGLTextureFormat(instance->m_Format), OpenGLFormatDataType(instance->m_Format), instance->m_LocalStorage.Data);
+
+			glTextureParameteri(instance->m_RendererID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+			glTextureParameteri(instance->m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		});
+	}
 
     TextureCube::TextureCube(TextureFormat format, uint32_t width, uint32_t height)
 	{

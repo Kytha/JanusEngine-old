@@ -35,6 +35,7 @@ namespace Janus
 	{
 	public:
 		TextureCube(TextureFormat format, uint32_t width, uint32_t height);
+		TextureCube(TextureFormat format, uint32_t width, uint32_t height, void* data);
 		TextureCube(const std::string& path);
 		~TextureCube();
 
@@ -62,7 +63,7 @@ namespace Janus
 		uint32_t m_Width, m_Height;
 
 		unsigned char* m_ImageData;
-		
+		Buffer m_LocalStorage;
 		std::string m_FilePath;
 	};
 }

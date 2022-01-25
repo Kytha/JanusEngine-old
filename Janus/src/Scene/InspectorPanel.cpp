@@ -121,6 +121,9 @@ namespace Janus {
         
         if (m_SelectionContext)
         {
+
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
             if (m_SelectionContext.HasComponent<Janus::TransformComponent>())
             {
                 DrawTransformationComponent(m_SelectionContext.GetComponent<Janus::TransformComponent>());
@@ -132,9 +135,54 @@ namespace Janus {
                     DrawMeshComponent(meshComponent);
                 }
             }
+			if (m_SelectionContext.HasComponent<Janus::SkyLightComponent>())
+            {
+            	DrawSkylightComponent(m_SelectionContext.GetComponent<SkyLightComponent>());
+            }
+
+			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			ImVec2 textSize = ImGui::CalcTextSize(" ADD        ");
+			textSize.x += GImGui->Style.FramePadding.x * 2.0f;
+			{
+				UI::ScopedColourStack addCompButtonColours(ImGuiCol_Button, IM_COL32(70, 70, 70, 200),
+													   ImGuiCol_ButtonHovered, IM_COL32(70, 70, 70, 255),
+													   ImGuiCol_ButtonActive, IM_COL32(70, 70, 70, 150));
+				ImGui::SameLine(contentRegionAvailable.x - (textSize.x + GImGui->Style.FramePadding.x));
+				if (ImGui::Button(" ADD       ", ImVec2(textSize.x + 4.0f, lineHeight + 2.0f)))
+					ImGui::OpenPopup("AddComponentPanel");
+			}
+			{
+				if (UI::BeginPopup("AddComponentPanel"))
+				{
+					if(!m_SelectionContext.HasComponent<SkyLightComponent>())
+					{
+						if (ImGui::MenuItem("Sky Light"))
+						{
+							m_SelectionContext.AddComponent<SkyLightComponent>();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+					if (!m_SelectionContext.HasComponent<MeshComponent>())
+					{
+						if (ImGui::MenuItem("Mesh"))
+						{
+							m_SelectionContext.AddComponent<MeshComponent>();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+
+					if (!m_SelectionContext.HasComponent<TransformComponent>())
+					{
+						if (ImGui::MenuItem("Transform"))
+						{
+							m_SelectionContext.AddComponent<TransformComponent>();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+				}	
+			}
         }
         
-       
         if (window)
 			ImGui::End();
     }
@@ -166,6 +214,14 @@ namespace Janus {
         ImGui::TreePop();
         }
     }
+
+	void InspectorPanel::DrawSkylightComponent(SkyLightComponent& skylightComponent) {
+		if (ImGui::CollapsingHeader("Skylight", nullptr, ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::Text(skylightComponent.SceneEnvironment->FilePath.c_str());
+			UI::Property("Level of Detail", skylightComponent.LOD, 0.0f, 11.0f);
+			UI::Property("Intensity", skylightComponent.Intensity, 0.01f, 0.0f, 5.0f);
+		}
+	}
 
     void InspectorPanel::DrawTransformationComponent(TransformComponent& transformComponent) 
     {

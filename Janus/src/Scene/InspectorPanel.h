@@ -20,6 +20,7 @@ namespace Janus {
 	private:
 		void DrawTransformationComponent(TransformComponent& transformComponent);
         void DrawMeshComponent(const MeshComponent& meshComponent);
+		void DrawSkylightComponent(SkyLightComponent& skylightComponent);
 		void DrawMaterials(const MaterialList& materials);
 	private:
 		Ref<Scene> m_Context;

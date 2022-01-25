@@ -94,8 +94,12 @@ namespace Janus {
 	};
 	struct SkyLightComponent
 	{
-		Environment SceneEnvironment;
+		Ref<Environment> SceneEnvironment;
 		float Intensity = 1.0f;
 		float Angle = 0.0f;
+		float LOD = 1.0f;
+		SkyLightComponent() = default;
+		SkyLightComponent(const Ref<Environment>& environment)
+			: SceneEnvironment(environment) {}
 	};
 }

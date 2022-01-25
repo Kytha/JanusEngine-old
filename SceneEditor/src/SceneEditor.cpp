@@ -29,6 +29,9 @@ class SceneSceneEditorLayer : public Janus::Layer
             Janus::Entity entity = m_Scene->CreateEntity("bust");
             entity.AddComponent<Janus::MeshComponent>(mesh);
 
+            Janus::Entity skybox = m_Scene->CreateEntity("skybox");
+            skybox.AddComponent<Janus::SkyLightComponent>(Janus::Environment::Load("assets/env/pink_sunrise_4k.hdr"));            
+
             Janus::Light light;
             light.Position = {1.0f, 5.0f, 0.0f};
             light.Radiance = {0.5,0.5,0.5};
@@ -117,17 +120,6 @@ class SceneSceneEditorLayer : public Janus::Layer
                 style.WindowMinSize.x = minWinSizeX;
                 
                 ImGui::Begin("Environment");
-
-                if(ImGui::Button("Load Skybox")){
-                    std::string filename = Janus::Application::Get().OpenFile("");
-                    if (filename != "")
-                    {
-                        m_Scene->SetEnvironmentMap(Janus::Environment::Load(filename));
-                    }
-                }
-
-
-                ImGui::SliderFloat("Skybox LOD", &m_Scene->GetSkyboxLOD(), 0.0f, 11.0f);
 
                 ImGui::Columns(2);
                 ImGui::AlignTextToFramePadding();
