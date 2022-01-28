@@ -55,6 +55,25 @@ namespace Janus
 				mi->OnMaterialValueUpdated(decl);
 		}
 
+		template <typename T>
+		void Set(const std::string &name, const std::vector<T>& array)
+		{
+			if(array.size() <= 0)
+				return;
+
+			auto decl = FindUniformDeclaration(name);
+			JN_ASSERT(decl, "MATERIAL_ERROR: Could not find uniform");
+			auto &buffer = GetUniformBufferTarget(decl);
+			uint32_t unitSize = sizeof(T);
+			uint32_t declUnitSize = decl->GetSize() / decl->GetCount();
+			JN_ASSERT(unitSize == declUnitSize, "MATERIAL_ERROR: Mismatch uniform datatype");
+			uint32_t size = unitSize * array.size();
+			buffer.Write((byte *)array.data(), size, decl->GetOffset());
+
+			for (auto mi : m_MaterialInstances)
+				mi->OnMaterialValueUpdated(decl);
+		}
+
 		void Set(const std::string &name, const Ref<Texture> &texture)
 		{
 			auto decl = FindResourceDeclaration(name);

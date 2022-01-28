@@ -6,6 +6,30 @@
 
 #include "Graphics/Renderer.h"
 #include "Graphics/Shader.h"
+
+
+GLenum glCheckError_(const char *file, int line)
+{
+    GLenum errorCode;
+    while ((errorCode = glGetError()) != GL_NO_ERROR)
+    {
+        std::string error;
+        switch (errorCode)
+        {
+            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+            case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+            case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+        }
+        std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+    }
+    return errorCode;
+}
+#define glCheckError() glCheckError_(__FILE__, __LINE__) 
+
 namespace Janus
 {
 
@@ -311,7 +335,7 @@ namespace Janus
 	{
 		JN_PROFILE_FUNCTION();
 		glUseProgram(m_RendererID);
-
+		/*
 		for (size_t i = 0; i < m_VSRendererUniformBuffers.size(); i++)
 		{
 			ShaderUniformBufferDeclaration *decl = m_VSRendererUniformBuffers[i];
@@ -358,7 +382,8 @@ namespace Janus
 				}
 			}
 		}
-
+		
+		*/
 		{
 			const auto &decl = m_VSMaterialUniformBuffer;
 			if (decl)
@@ -374,7 +399,8 @@ namespace Janus
 						for (size_t k = 0; k < fields.size(); k++)
 						{
 							ShaderUniformDeclaration *field = fields[k];
-							field->m_Location = GetUniformLocation(uniform->m_Name + "." + field->m_Name);
+							if(!uniform->IsArray())
+								field->m_Location = GetUniformLocation(uniform->m_Name + "." + field->m_Name);
 						}
 					}
 					else
@@ -400,7 +426,8 @@ namespace Janus
 						for (size_t k = 0; k < fields.size(); k++)
 						{
 							ShaderUniformDeclaration *field = fields[k];
-							field->m_Location = GetUniformLocation(uniform->m_Name + "." + field->m_Name);
+							if(!uniform->IsArray())
+								field->m_Location = GetUniformLocation(uniform->m_Name + "." + field->m_Name);
 						}
 					}
 					else
@@ -410,7 +437,7 @@ namespace Janus
 				}
 			}
 		}
-
+		
 		uint32_t sampler = 0;
 		for (size_t i = 0; i < m_Resources.size(); i++)
 		{
@@ -490,6 +517,17 @@ namespace Janus
 			std::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
 			std::cout << "ERROR::SHADER::SHADER LINKING FAIL" << m_Name << std::endl;
+			glCheckError();
+
+			GLint pSize = 0;
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &pSize);
+
+			GLchar *plog = new GLchar[pSize];
+			for(int i = 0; i < pSize; i++) {
+				plog[i] = 0;
+			}
+			glGetProgramInfoLog(program, pSize, NULL, plog);
+			std::cout << plog;
 
 			// We don't need the program anymore.
 			glDeleteProgram(program);
@@ -671,6 +709,41 @@ namespace Janus
 		}
 	}
 
+	void Shader::UploadUniformField(uint32_t location, const ShaderUniformDeclaration& field, byte *data, int32_t offset)
+	{
+		switch (field.GetType())
+		{
+		case ShaderUniformDeclaration::Type::BOOL:
+			UploadUniformFloat(location, *(bool *)&data[offset]);
+			break;
+		case ShaderUniformDeclaration::Type::FLOAT32:
+			UploadUniformFloat(location, *(float *)&data[offset]);
+			break;
+		case ShaderUniformDeclaration::Type::INT32:
+			UploadUniformInt(location, *(int32_t *)&data[offset]);
+			break;
+		case ShaderUniformDeclaration::Type::VEC2:
+			UploadUniformFloat2(location, *(glm::vec2 *)&data[offset]);
+			break;
+		case ShaderUniformDeclaration::Type::VEC3:
+			glm::vec3 vec = *(glm::vec3 *)&data[offset];
+
+			UploadUniformFloat3(location, *(glm::vec3 *)&data[offset]);
+			break;
+		case ShaderUniformDeclaration::Type::VEC4:
+			UploadUniformFloat4(location, *(glm::vec4 *)&data[offset]);
+			break;
+		case ShaderUniformDeclaration::Type::MAT3:
+			UploadUniformMat3(location, *(glm::mat3 *)&data[offset]);
+			break;
+		case ShaderUniformDeclaration::Type::MAT4:
+			UploadUniformMat4(location, *(glm::mat4 *)&data[offset]);
+			break;
+		default:
+			JN_ASSERT(false, "SHADER_ERROR: Unknown uniform type!");
+		}
+	}
+	
 	void Shader::ResolveAndSetUniformField(const ShaderUniformDeclaration &field, byte *data, int32_t offset)
 	{
 		switch (field.GetType())
@@ -826,11 +899,18 @@ namespace Janus
 	{
 		const ShaderStruct &s = uniform->GetShaderUniformStruct();
 		const auto &fields = s.GetFields();
-		for (size_t k = 0; k < fields.size(); k++)
-		{
-			ShaderUniformDeclaration *field = (ShaderUniformDeclaration *)fields[k];
-			ResolveAndSetUniformField(*field, buffer, offset);
-			offset += field->m_Size;
+		for (size_t i = 0; i < uniform->GetCount(); i++) {
+			for (size_t k = 0; k < fields.size(); k++)
+			{
+				ShaderUniformDeclaration *field = (ShaderUniformDeclaration *)fields[k];
+				uint32_t location = field->GetLocation();
+				if(uniform->IsArray()) {
+					const std::string name = uniform->m_Name + "[" + std::to_string(i) + "]." + field->m_Name;
+					location = GetUniformLocation(name);
+				}
+				UploadUniformField(location, *field, buffer, offset);
+				offset += field->m_Size;
+			}
 		}
 	}
 

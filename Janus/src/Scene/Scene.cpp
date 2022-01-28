@@ -60,8 +60,6 @@ namespace Janus
 					lightComponent.Radiance,
 					lightComponent.Intensity,
 					lightComponent.Radius,
-					lightComponent.CastsShadows,
-					lightComponent.SoftShadows,
 					lightComponent.Falloff,
 				};
 			}

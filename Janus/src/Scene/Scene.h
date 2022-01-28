@@ -21,8 +21,6 @@ namespace Janus
         glm::vec3 Radiance = {0.0f, 0.0f, 0.0f};
         float Intensity = 0.0f;
         float Radius = 25.0f;
-        bool CastsShadows = true;
-        bool SoftShadows = true;
         float Falloff = 1.f;
     };
     struct LightEnvironment

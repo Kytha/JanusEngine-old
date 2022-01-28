@@ -12,10 +12,10 @@ namespace Colours
 	// members of a static "Theme" class and add a quick ImGui window to adjust the colour values
 	namespace Theme
 	{
-		constexpr auto accent					= IM_COL32(236, 158, 36, 255);
-		constexpr auto highlight				= IM_COL32(39, 185, 242, 255);
-		constexpr auto niceBlue					= IM_COL32(83, 232, 254, 255);
-		constexpr auto compliment				= IM_COL32(78, 151, 166, 255);
+		constexpr auto accent					= IM_COL32(124, 58, 237, 255);
+		constexpr auto highlight				= IM_COL32(124, 58, 237, 255);
+		constexpr auto niceBlue					= IM_COL32(124, 58, 237, 255);
+		constexpr auto compliment				= IM_COL32(124, 58, 237, 255);
 		constexpr auto background				= IM_COL32(36, 36, 36, 255);
 		constexpr auto backgroundDark			= IM_COL32(26, 26, 26, 255);
 		constexpr auto titlebar					= IM_COL32(21, 21, 21, 255);
@@ -27,11 +27,11 @@ namespace Colours
 		constexpr auto groupHeader				= IM_COL32(47, 47, 47, 255);
 		//constexpr auto selection				= IM_COL32(191, 177, 155, 255);
 		//constexpr auto selectionMuted			= IM_COL32(59, 57, 45, 255);
-		constexpr auto selection				= IM_COL32(237, 192, 119, 255);
-		constexpr auto selectionMuted			= IM_COL32(237, 201, 142, 23);
+		constexpr auto selection				= IM_COL32(124, 58, 237, 255);
+		constexpr auto selectionMuted			= IM_COL32(167, 139, 250, 255);
 
 		//constexpr auto backgroundPopup			= IM_COL32(63, 73, 77, 255); // in between
 		//constexpr auto backgroundPopup			= IM_COL32(63, 77, 76, 255); // most green
-		constexpr auto backgroundPopup			= IM_COL32(63, 70, 77, 255); // most blue
+		constexpr auto backgroundPopup			= IM_COL32(63, 77, 77, 255); // most blue
 	}
 }

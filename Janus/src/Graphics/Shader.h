@@ -10,6 +10,7 @@
 
 #include "Graphics/ShaderUniform.h"
 
+
 namespace Janus
 {
 	class Shader : public RefCounted
@@ -68,6 +69,7 @@ namespace Janus
 		const std::vector<ShaderResourceDeclaration *> &GetResources() const { return m_Resources; }
 
 	private:
+		void UploadUniformField(uint32_t location, const ShaderUniformDeclaration& field, byte *data, int32_t offset);
 		void UploadUniformInt(uint32_t location, int32_t value);
 		void UploadUniformIntArray(uint32_t location, int32_t *values, int32_t count);
 		void UploadUniformFloat(uint32_t location, float value);

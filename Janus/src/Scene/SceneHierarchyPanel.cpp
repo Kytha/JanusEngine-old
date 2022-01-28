@@ -39,6 +39,13 @@ namespace Janus {
 					SetSelected(newEntity);
 					ImGui::CloseCurrentPopup();
 				}
+				if (ImGui::MenuItem("Point Light")) {
+					auto newEntity = m_Context->CreateEntity("New Point Light");
+					newEntity.AddComponent<PointLightComponent>();
+					newEntity.GetComponent<TransformComponent>().Translation = glm::vec3{ 0 };
+					SetSelected(newEntity);
+					ImGui::CloseCurrentPopup();
+				}
 				UI::EndPopup();
 			}
 

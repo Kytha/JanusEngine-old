@@ -162,8 +162,8 @@ namespace Janus
 
 		// Tabs
 		colors[ImGuiCol_Tab]				= ImGui::ColorConvertU32ToFloat4(Colours::Theme::titlebar);
-		colors[ImGuiCol_TabHovered]			= ImColor(255, 225, 135, 30);
-		colors[ImGuiCol_TabActive]			= ImColor(255, 225, 135, 60);
+		colors[ImGuiCol_TabHovered]			= ImColor(139, 92, 246, 30);
+		colors[ImGuiCol_TabActive]			= ImColor(139, 92, 246, 60);
 		colors[ImGuiCol_TabUnfocused]		= ImGui::ColorConvertU32ToFloat4(Colours::Theme::titlebar);
 		colors[ImGuiCol_TabUnfocusedActive] = colors[ImGuiCol_TabHovered];
 
@@ -184,7 +184,7 @@ namespace Janus
 		colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.0f);
 
 		// Check Mark
-		colors[ImGuiCol_CheckMark]			= ImColor(200, 200, 200, 255);
+		colors[ImGuiCol_CheckMark]			= ImGui::ColorConvertU32ToFloat4(Colours::Theme::accent);
 
 		// Slider
 		colors[ImGuiCol_SliderGrab]			= ImVec4(0.51f, 0.51f, 0.51f, 0.7f);
@@ -193,8 +193,6 @@ namespace Janus
 		// Text
 		colors[ImGuiCol_Text]				= ImGui::ColorConvertU32ToFloat4(Colours::Theme::text);
 
-		// Checkbox
-		colors[ImGuiCol_CheckMark]			= ImGui::ColorConvertU32ToFloat4(Colours::Theme::text);
 
 		// Separator
 		colors[ImGuiCol_Separator]			= ImGui::ColorConvertU32ToFloat4(Colours::Theme::backgroundDark);

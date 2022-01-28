@@ -49,8 +49,6 @@ struct PointLight {
     vec3 Radiance;
     float Intensity;
     float Radius;
-    bool CastsShadows;
-    bool SoftShadows;
     float Falloff;
 };  
 
@@ -81,7 +79,7 @@ uniform float u_MetalnessTexToggle;
 uniform float u_RoughnessTexToggle;
 uniform float u_AoTexToggle;
 
-uniform PointLight u_PointLights[1024];
+uniform PointLight u_PointLights[100];
 uniform int u_PointLightCount;
 uniform vec3 u_CameraPosition;
 
@@ -143,8 +141,11 @@ vec3 Lighting(vec3 F0) {
         vec3 H = normalize(m_Params.View + L);
 
         float distance = length(light.Position - vs_Input.WorldPosition);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = light.Radiance * 20 * light.Irradiance * attenuation;
+
+        float attenuation = clamp(1.0 - (distance * distance) / (light.Radius * light.Radius), 0.0, 1.0);
+		attenuation *= mix(attenuation, 1.0, light.Falloff);
+
+        vec3 radiance = light.Radiance * 20 * light.Intensity * attenuation;
 
         float NDF = DistributionGGX(m_Params.Normal,H,m_Params.Roughness);
         float G = GeometrySmith(m_Params.Normal,m_Params.View,L, m_Params.Roughness);
@@ -163,13 +164,6 @@ vec3 Lighting(vec3 F0) {
     }
     return result;
 }
-
-struct DirLight {
-    vec3 direction;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};  
 
 void main()
 {
@@ -198,12 +192,13 @@ void main()
 
     vec3 lightContribution = Lighting(F0);
     //vec3 color = texture(u_AlbedoTexture, vs_Input.TexCoord).rgb;
-	vec3 color = ambient + lightContribution;
+    vec3 color = ambient + lightContribution;
+	
 
     // Tone Mapping / HDR
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));  
-   
+    
     FragColor = vec4(color, 1.0);
     
 }

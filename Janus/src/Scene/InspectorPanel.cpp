@@ -164,10 +164,21 @@ namespace Janus {
 							ImGui::CloseCurrentPopup();
 						}
 					}
+					if (!m_SelectionContext.HasComponent<PointLightComponent>())
+					{
+						if (ImGui::MenuItem("Point Light"))
+						{
+							m_SelectionContext.AddComponent<PointLightComponent>();
+							ImGui::CloseCurrentPopup();
+						}
+					}
 					UI::EndPopup();
 				}	
 			}
-
+			if (m_SelectionContext.HasComponent<Janus::TagComponent>())
+            {
+                DrawTagComponent(m_SelectionContext.GetComponent<Janus::TagComponent>());
+            }
 			if (m_SelectionContext.HasComponent<Janus::TransformComponent>())
             {
                 DrawTransformationComponent(m_SelectionContext.GetComponent<Janus::TransformComponent>());
@@ -183,11 +194,40 @@ namespace Janus {
             {
             	DrawSkylightComponent(m_SelectionContext.GetComponent<SkyLightComponent>());
             }
+
+			if (m_SelectionContext.HasComponent<Janus::PointLightComponent>())
+            {
+            	DrawPointLightComponent(m_SelectionContext.GetComponent<PointLightComponent>());
+            }
         }
         
         if (window)
 			ImGui::End();
     }
+
+	void InspectorPanel::DrawTagComponent(TagComponent& tagComponent) {
+		if (ImGui::CollapsingHeader("Tag", nullptr, ImGuiTreeNodeFlags_DefaultOpen)) {
+			std::string& name = (std::string&)tagComponent; 
+			UI::BeginPropertyGrid();
+			UI::Property("Name", name);
+			UI::EndPropertyGrid();	
+		}
+	}
+
+	void InspectorPanel::DrawPointLightComponent(PointLightComponent& pointLightComponent) {
+		if (ImGui::CollapsingHeader("Point Light", nullptr, ImGuiTreeNodeFlags_DefaultOpen)) {
+			UI::BeginPropertyGrid();
+			UI::PropertyColor("Radiance", pointLightComponent.Radiance);
+			UI::Property("Intensity", pointLightComponent.Intensity, 0.05f, 0.f, 500.f);
+			//UI::Property("Source Size", dlc.LightSize, 0.05f, 0.f, std::numeric_limits<float>::max());
+			//UI::Property("Min Radius", dlc.MinRadius, 0.05f, 0.f, std::numeric_limits<float>::max());
+			UI::Property("Radius", pointLightComponent.Radius, 0.1f, 0.f, std::numeric_limits<float>::max());
+			//UI::Property("Cast Shadows", dlc.CastsShadows);
+			//UI::Property("Soft Shadows", dlc.SoftShadows);
+			UI::Property("Falloff", pointLightComponent.Falloff, 0.005f, 0.f, 1.f);
+			UI::EndPropertyGrid();		
+		}
+	}
 
     void InspectorPanel::DrawMeshComponent(const MeshComponent& meshComponent) {
         if (UI::BeginTreeNode("Mesh Renderer", false))

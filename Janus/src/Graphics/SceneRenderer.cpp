@@ -122,7 +122,7 @@ namespace Janus
             {
                 material->Set("u_ViewProjectionMatrix", viewProjection);
                 material->Set("u_CameraPosition", cameraPosition);
-                material->Set("u_PointLights", s_Data.sceneData.ActiveLight);
+                material->Set("u_PointLights", s_Data.sceneData.sceneLights);
                 material->Set("u_PointLightCount", lightCount);
             }
             Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
