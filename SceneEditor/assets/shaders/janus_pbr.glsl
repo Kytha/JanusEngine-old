@@ -44,10 +44,14 @@ vec3 Fdielectric = vec3(0.04);
 
 const int LightCount = 1;
 
-struct Light {
+struct PointLight {
     vec3 Position;
     vec3 Radiance;
-    float Irradiance;
+    float Intensity;
+    float Radius;
+    bool CastsShadows;
+    bool SoftShadows;
+    float Falloff;
 };  
 
 
@@ -77,7 +81,8 @@ uniform float u_MetalnessTexToggle;
 uniform float u_RoughnessTexToggle;
 uniform float u_AoTexToggle;
 
-uniform Light u_Lights;
+uniform PointLight u_PointLights[1024];
+uniform int u_PointLightCount;
 uniform vec3 u_CameraPosition;
 
 struct PBRParameters
@@ -131,13 +136,15 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 vec3 Lighting(vec3 F0) {
     vec3 result = vec3(0.0);
-    for(int i = 0; i < LightCount; i++) {
-        vec3 L = normalize(u_Lights.Position - vs_Input.WorldPosition);
+    for(int i = 0; i < u_PointLightCount; i++) {
+
+        PointLight light = u_PointLights[i];
+        vec3 L = normalize(light.Position - vs_Input.WorldPosition);
         vec3 H = normalize(m_Params.View + L);
 
-        float distance = length(u_Lights.Position - vs_Input.WorldPosition);
+        float distance = length(light.Position - vs_Input.WorldPosition);
         float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = u_Lights.Radiance * 20 * u_Lights.Irradiance * attenuation;
+        vec3 radiance = light.Radiance * 20 * light.Irradiance * attenuation;
 
         float NDF = DistributionGGX(m_Params.Normal,H,m_Params.Roughness);
         float G = GeometrySmith(m_Params.Normal,m_Params.View,L, m_Params.Roughness);

@@ -9,49 +9,69 @@
 #include "entt/entt.hpp"
 #include "Core/UUID.h"
 #include "Graphics/Environment.h"
-namespace Janus {
+namespace Janus
+{
 
     class Entity;
     using EntityMap = std::unordered_map<UUID, Entity>;
+
+    struct PointLight
+    {
+        glm::vec3 Position = {0.0f, 0.0f, 0.0f};
+        glm::vec3 Radiance = {0.0f, 0.0f, 0.0f};
+        float Intensity = 0.0f;
+        float Radius = 25.0f;
+        bool CastsShadows = true;
+        bool SoftShadows = true;
+        float Falloff = 1.f;
+    };
+    struct LightEnvironment
+    {
+        std::vector<PointLight> PointLights;
+    };
+
     class Scene : public RefCounted
     {
     public:
-        Scene(const std::string& debugName = "Scene");
+        Scene(const std::string &debugName = "Scene");
         ~Scene();
-        
+
         void Init();
 
-        void OnUpdate(Timestep ts, EditorCamera& camera);
+        void OnUpdate(Timestep ts, EditorCamera &camera);
 
-        inline void SetLight(const Light& light) {m_Light = light;}
-        inline Light& GetLight() { return m_Light; }
+        inline void SetLight(const Light &light) { m_Light = light; }
+        inline Light &GetLight() { return m_Light; }
 
         UUID GetUUID() const { return m_SceneID; }
-		Entity CreateEntity(const std::string& name = "");
-		Entity CreateEntityWithID(UUID uuid, const std::string& name = "", bool runtimeMap = false);
-		void DestroyEntity(Entity entity);
+        Entity CreateEntity(const std::string &name = "");
+        Entity CreateEntityWithID(UUID uuid, const std::string &name = "", bool runtimeMap = false);
+        void DestroyEntity(Entity entity);
 
-        Entity FindEntityByTag(const std::string& tag);
-		Entity FindEntityByUUID(UUID id);
+        Entity FindEntityByTag(const std::string &tag);
+        Entity FindEntityByUUID(UUID id);
 
-        const EntityMap& GetEntityMap() const { return m_EntityIDMap; }
-        void SetEnvironmentMap(Ref<Environment> environment) {m_Environment = environment;}
-        float& GetSkyboxLOD() {return m_SkyboxLod;}
-        void SetSkybox(const Ref<TextureCube>& skybox);
+        const EntityMap &GetEntityMap() const { return m_EntityIDMap; }
+        void SetEnvironmentMap(Ref<Environment> environment) { m_Environment = environment; }
+        float &GetSkyboxLOD() { return m_SkyboxLod; }
+        void SetSkybox(const Ref<TextureCube> &skybox);
 
         Light m_Light;
+
     public:
         static Ref<Scene> CreateEmpty();
         Ref<Material> m_SkyboxMaterial;
+
     private:
         UUID m_SceneID;
         std::string m_DebugName;
         float m_LightMultiplier = 0.3f;
         entt::entity m_SceneEntity;
-		entt::registry m_Registry;
+        entt::registry m_Registry;
         EntityMap m_EntityIDMap;
         Ref<TextureCube> m_SkyboxTexture;
         Ref<Environment> m_Environment;
+        LightEnvironment m_LightEnvironment;
         float m_SkyboxLod = 0.1f;
         float m_EnvironmentIntensity = 1.0f;
 
@@ -60,4 +80,3 @@ namespace Janus {
         friend class SceneHierarchyPanel;
     };
 }
-
