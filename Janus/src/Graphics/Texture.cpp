@@ -39,7 +39,7 @@ namespace Janus
 		return levels;
 	}
 
-    Texture::Texture(const std::string &filePath)
+    Texture2D::Texture2D(const std::string &filePath)
     {
         int width, height, nrChannels;
         m_ImageData.Data = (byte *)stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
@@ -69,7 +69,7 @@ namespace Janus
         m_Height = height;
         m_Width = width;
         m_FilePath = filePath;
-        Ref<Texture> instance = this;
+        Ref<Texture2D> instance = this;
         Renderer::Submit([instance, format]() mutable
                          {
                              glGenTextures(1, &instance->m_RendererID);
@@ -89,14 +89,21 @@ namespace Janus
                          });
     }
 
-    bool Texture::Loaded() const
+	Texture2D::~Texture2D() {
+		GLuint rendererID = m_RendererID;
+		Renderer::Submit([rendererID]() {
+			glDeleteTextures(1, &rendererID);
+		});
+	}
+
+    bool Texture2D::Loaded() const
     {
         return m_Loaded;
     }
 
-    void Texture::Bind(int slot)
+    void Texture2D::Bind(uint32_t slot) 
     {
-        Ref<Texture> instance = this;
+        Ref<Texture2D> instance = this;
         Renderer::Submit([instance, slot]() mutable
                          { glBindTextureUnit(slot, instance->m_RendererID); });
     }
@@ -251,7 +258,7 @@ namespace Janus
 		});
 	}
 
-	void TextureCube::Bind(uint32_t slot) const
+	void TextureCube::Bind(uint32_t slot)
 	{
 		Ref<const TextureCube> instance = this;
 		Renderer::Submit([instance, slot]() {

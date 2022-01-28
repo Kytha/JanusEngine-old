@@ -24,13 +24,24 @@ namespace Janus
 		friend class MaterialInstance;
 
 	public:
-		Material(const Ref<Shader> &shader);
+		Material(const Ref<Shader> &shader, const std::string& name);
 		void Bind();
 
 		uint32_t GetFlags() const { return m_MaterialFlags; }
-		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= (uint32_t)flag; }
-
+		const std::string &GetName() const { return m_Name; }
+		void SetFlag(MaterialFlag flag, bool value);
+		bool GetFlag(MaterialFlag flag) const { return (uint32_t)flag & m_MaterialFlags; }
 		Ref<Shader> GetShader() { return m_Shader; }
+
+		void Set(const std::string& name, const Ref<TextureCube>& texture)
+		{
+			Set(name, (const Ref<Texture>&)texture);
+		}
+
+		void Set(const std::string& name, const Ref<Texture2D>& texture)
+		{
+			Set(name, (const Ref<Texture>&)texture);
+		}
 
 		template <typename T>
 		void Set(const std::string &name, const T &value)
@@ -71,10 +82,24 @@ namespace Janus
 			return m_Textures[slot];
 		}
 
+		template <typename T>
+		Ref<T> TryGetResource (const std::string &name)
+		{
+			auto decl = FindResourceDeclaration(name);
+			if (!decl)
+				return nullptr;
+
+			uint32_t slot = decl->GetRegister();
+			if (slot >= m_Textures.size())
+				return nullptr;
+
+			return Ref<T>(m_Textures[slot]);
+		}
+
 		ShaderResourceDeclaration *FindResourceDeclaration(const std::string &name);
 
 	public:
-		static Ref<Material> Create(const Ref<Shader> &shader);
+		static Ref<Material> Create(const Ref<Shader> &shader, const std::string &name);
 
 	private:
 		void AllocateStorage();
@@ -87,7 +112,7 @@ namespace Janus
 		Ref<Shader> m_Shader;
 		Buffer m_VSUniformStorageBuffer;
 		Buffer m_PSUniformStorageBuffer;
-
+		std::string m_Name;
 		uint32_t m_MaterialFlags;
 	};
 
@@ -111,11 +136,6 @@ namespace Janus
 			auto &buffer = GetUniformBufferTarget(decl);
 			buffer.Write((byte *)&value, decl->GetSize(), decl->GetOffset());
 			m_OverriddenValues.insert(name);
-		}
-
-		void Set(const std::string& name, const Ref<TextureCube>& texture)
-		{
-			Set(name, (const Ref<Texture>&)texture);
 		}
 
 		void Set(const std::string &name, const Ref<Texture> &texture)
@@ -151,7 +171,8 @@ namespace Janus
 			return Ref<T>(m_Textures[slot]);
 		}
 
-		Ref<Texture> TryGetResource (const std::string &name)
+		template <typename T>
+		Ref<T> TryGetResource (const std::string &name)
 		{
 			auto decl = m_Material->FindResourceDeclaration(name);
 			if (!decl)
@@ -161,20 +182,9 @@ namespace Janus
 			if (slot >= m_Textures.size())
 				return nullptr;
 
-			return Ref<Texture>(m_Textures[slot]);
+			return Ref<T>(m_Textures[slot]);
 		}
 
-		Ref<TextureCube> TryGetTextureCube (const std::string &name)
-		{
-			auto decl = m_Material->FindResourceDeclaration(name);
-			if (!decl)
-				return nullptr;
-
-			uint32_t slot = decl->GetRegister();
-			if (slot >= m_Textures.size())
-				return nullptr;	
-			return Ref<TextureCube>(m_Textures[slot]);
-		}
 		void Bind();
 
 		uint32_t GetFlags() const { return m_Material->m_MaterialFlags; }

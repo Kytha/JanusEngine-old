@@ -182,7 +182,7 @@ namespace Janus
 		s_Data.m_ActiveRenderPass = nullptr;
 	}
 
-	void Renderer::SubmitQuad(Ref<MaterialInstance> material, const glm::mat4 &transform)
+	void Renderer::SubmitQuad(Ref<Material> material, const glm::mat4 &transform)
 	{
 		bool depthTest = true;
 		bool cullFace = true;
@@ -202,7 +202,7 @@ namespace Janus
 		Renderer::DrawIndexed(6, PrimitiveType::Triangles, depthTest, cullFace);
 	}
 
-	void Renderer::SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform, Ref<MaterialInstance> overrideMaterial)
+	void Renderer::SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform, Ref<Material> overrideMaterial)
 	{
 		mesh->m_VertexBuffer->Bind();
 		mesh->m_Pipeline->Bind();
@@ -213,8 +213,8 @@ namespace Janus
 		{
 			auto material = overrideMaterial ? overrideMaterial : materials[submesh.MaterialIndex];
 			auto shader = material->GetShader();
-			material->Bind();
 
+			material->Bind();
 			shader->SetMat4("u_Transform", transform * submesh.Transform);
 			Renderer::Submit([submesh, material]()
 							 {
@@ -232,7 +232,7 @@ namespace Janus
 		}
 	}
 
-	void Renderer::SubmitFullscreenQuad(Ref<MaterialInstance> material)
+	void Renderer::SubmitFullscreenQuad(Ref<Material> material)
 	{
 		bool depthTest = true;
 		bool cullFace = true;

@@ -3,6 +3,7 @@
 
 #include <imgui.h>
 #include "imgui_internal.h"
+#include "ImGui/ImGui.h"
 namespace Janus {
    	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 		: m_Context(context)
@@ -29,18 +30,23 @@ namespace Janus {
         ImRect windowRect = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
         if (m_Context)
         {
+			if (ImGui::Button("Add Entity")) 
+				ImGui::OpenPopup("CreateEntityPanel");
+
+			if (UI::BeginPopup("CreateEntityPanel")) {
+				if (ImGui::MenuItem("Empty Entity")) {
+					auto newEntity = m_Context->CreateEntity("Empty Entity");
+					SetSelected(newEntity);
+					ImGui::CloseCurrentPopup();
+				}
+				UI::EndPopup();
+			}
+
+
             for (auto entity : m_Context->m_Registry.view<IDComponent>())
 			{
                 DrawEntityNode({ entity, m_Context.Raw() });
             }
-			if (ImGui::BeginPopupContextItem()) {
-				if (ImGui::BeginMenu("Create")) {
-					if (ImGui::MenuItem("Empty Entity")) {
-						auto newEntity = m_Context->CreateEntity("Empty Entity");
-						SetSelected(newEntity);
-					}
-				}
-			}
         }
 
         if (window)
@@ -66,6 +72,7 @@ namespace Janus {
 				m_SelectionChangedCallback(m_SelectionContext);
 		}
         bool entityDeleted = false;
+		
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Delete"))
@@ -74,18 +81,20 @@ namespace Janus {
 			ImGui::EndPopup();
 		}
 
+        if(opened) {
+            ImGui::TreePop();
+        }
+
+		
         if (entityDeleted)
 		{
 			m_Context->DestroyEntity(entity);
 			if (entity == m_SelectionContext)
 				m_SelectionContext = {};
 
-			m_EntityDeletedCallback(entity);
+			if(m_EntityDeletedCallback)
+				m_EntityDeletedCallback(entity);
 		}
-
-        if(opened) {
-            ImGui::TreePop();
-        }
     }
 
 }

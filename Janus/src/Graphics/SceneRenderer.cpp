@@ -15,7 +15,7 @@ namespace Janus
         {
             SceneRendererCamera sceneCamera;
             float SceneEnvironmentIntensity;
-            Ref<MaterialInstance> SkyboxMaterial;
+            Ref<Material> SkyboxMaterial;
             Light ActiveLight;
 
         } sceneData;
@@ -27,10 +27,10 @@ namespace Janus
         struct DrawCommand
         {
             Ref<Mesh> Mesh;
-            Ref<MaterialInstance> Material;
+            Ref<Material> Material;
             glm::mat4 Transform;
         };
-        Ref<MaterialInstance> GridMaterial;
+        Ref<Material> GridMaterial;
         std::vector<DrawCommand> DrawList;
     };
 
@@ -57,7 +57,7 @@ namespace Janus
         s_Data.CompositePass = Ref<RenderPass>::Create(compRenderPassSpec);
 
         auto gridShader = Renderer::GetShaderLibrary()->Get("janus_grid");
-        s_Data.GridMaterial = MaterialInstance::Create(Material::Create(gridShader));
+        s_Data.GridMaterial = Material::Create(gridShader, "grid_material");
         s_Data.GridMaterial->SetFlag(MaterialFlag::TwoSided, true);
         float gridScale = 16.025f, gridSize = 0.025f;
         s_Data.GridMaterial->Set("u_Scale", gridScale);
@@ -90,7 +90,7 @@ namespace Janus
         FlushDrawList();
     }
 
-    void SceneRenderer::SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform, Ref<MaterialInstance> overrideMaterial)
+    void SceneRenderer::SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform, Ref<Material> overrideMaterial)
     {
         // TODO: Culling, sorting, etc.
         s_Data.DrawList.push_back({mesh, overrideMaterial, transform});
@@ -112,12 +112,13 @@ namespace Janus
 
         for (auto &dc : s_Data.DrawList)
         {
-            auto baseMaterial = dc.Mesh->GetMaterial();
-            baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
-            //baseMaterial->Set("u_ViewMatrix", sceneCamera.ViewMatrix);
-            baseMaterial->Set("u_CameraPosition", cameraPosition);
-            baseMaterial->Set("u_Lights", s_Data.sceneData.ActiveLight);
             auto overrideMaterial = nullptr;
+            auto &materials = dc.Mesh->GetMaterials();
+            for(auto material : materials) {
+                material->Set("u_ViewProjectionMatrix", viewProjection);
+                material->Set("u_CameraPosition", cameraPosition);
+                material->Set("u_Lights", s_Data.sceneData.ActiveLight);
+            }
             Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
         }
         s_Data.GridMaterial->Set("u_ViewProjection", viewProjection);
@@ -160,7 +161,7 @@ namespace Janus
 		Ref<TextureCube> envUnfiltered = Ref<TextureCube>::Create(TextureFormat::Float16, cubemapSize, cubemapSize);
 		if (!equirectangularConversionShader)
 			equirectangularConversionShader = Ref<Shader>::Create("assets/shaders/janus_EquirectangularToCubeMap.glsl");
-		Ref<Texture> envEquirect = Ref<Texture>::Create(filepath);
+		Ref<Texture2D> envEquirect = Ref<Texture2D>::Create(filepath);
 		//JN_ASSERT(envEquirect->GetFormat() == TextureFormat::Float16, "Texture is not HDR!");
 
 		equirectangularConversionShader->Bind();

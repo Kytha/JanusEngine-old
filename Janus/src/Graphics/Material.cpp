@@ -6,12 +6,12 @@
 namespace Janus
 {
 
-	Ref<Material> Material::Create(const Ref<Shader> &shader)
+	Ref<Material> Material::Create(const Ref<Shader> &shader, const std::string& name)
 	{
-		return Ref<Material>::Create(shader);
+		return Ref<Material>::Create(shader, name);
 	}
 
-	Material::Material(const Ref<Shader> &shader) : m_Shader(shader)
+	Material::Material(const Ref<Shader> &shader, const std::string& name) : m_Shader(shader), m_Name(name)
 	{
 		AllocateStorage();
 		m_MaterialFlags |= (uint32_t)MaterialFlag::DepthTest;
@@ -94,6 +94,7 @@ namespace Janus
 		if (m_PSUniformStorageBuffer)
 			m_Shader->SetPSMaterialUniformBuffer(m_PSUniformStorageBuffer);
 
+		
 		BindTextures();
 	}
 
@@ -104,6 +105,18 @@ namespace Janus
 			auto &texture = m_Textures[i];
 			if (texture)
 				texture->Bind(i);
+		}
+	}
+
+	void Material::SetFlag(MaterialFlag flag, bool value)
+	{
+		if (value)
+		{
+			m_MaterialFlags |= (uint32_t)flag;
+		}
+		else
+		{
+			m_MaterialFlags &= ~(uint32_t)flag;
 		}
 	}
 

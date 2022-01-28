@@ -5,7 +5,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
+#include "GLFW/glfw3.h"
 class SceneSceneEditorLayer : public Janus::Layer
 {
     public:
@@ -23,8 +23,10 @@ class SceneSceneEditorLayer : public Janus::Layer
 
             m_SceneHierarchyPanel = Janus::CreateScope<Janus::SceneHierarchyPanel>(m_Scene);
             m_InspectorPanel = Janus::CreateScope<Janus::InspectorPanel>(m_Scene);
+            
 
             m_SceneHierarchyPanel->SetSelectionChangedCallback(std::bind(&SceneSceneEditorLayer::SelectEntity, this, std::placeholders::_1));
+            m_SceneHierarchyPanel->SetEntityDeletedCallback(std::bind(&SceneSceneEditorLayer::OnEntityDeleted, this, std::placeholders::_1));
             auto mesh = Janus::Ref<Janus::Mesh>::Create("./assets/tg1lch1fa_LOD0.fbx");
             Janus::Entity entity = m_Scene->CreateEntity("bust");
             entity.AddComponent<Janus::MeshComponent>(mesh);
@@ -42,7 +44,7 @@ class SceneSceneEditorLayer : public Janus::Layer
 
         void OnAttach()
         {
-             m_CheckerboardTex = Janus::Ref<Janus::Texture>::Create("assets/textures/Checkerboard.tga");
+             m_CheckerboardTex = Janus::Ref<Janus::Texture2D>::Create("assets/textures/Checkerboard.tga");
         }
 
         void OnUpdate(Janus::Timestep ts) override
@@ -76,15 +78,24 @@ class SceneSceneEditorLayer : public Janus::Layer
             m_InspectorPanel->SetSelected(entity);
 	    }
 
+        void OnEntityDeleted(Janus::Entity entity)
+	    {
+		    m_SelectionContext.clear();
+            m_InspectorPanel->SetSelected({});
+	    }
+
+
         void OnImGuiRender() 
         {
             
-            static bool dockspaceOpen = true;
             static bool opt_fullscreen_persistant = true;
             bool opt_fullscreen = opt_fullscreen_persistant;
             static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-
-            ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+            
+            ImGuiIO& io = ImGui::GetIO();
+            ImGuiStyle& style = ImGui::GetStyle();
+            io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
+            ImGuiWindowFlags window_flags = /*ImGuiWindowFlags_MenuBar | */ImGuiWindowFlags_NoDocking;
             if (opt_fullscreen)
 		    {
 			ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -99,16 +110,19 @@ class SceneSceneEditorLayer : public Janus::Layer
             
             //if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 			//window_flags |= ImGuiWindowFlags_NoBackground;
+            auto* window = static_cast<GLFWwindow*>(Janus::Application::Get().GetWindow().GetNativeWindow());
+            bool isMaximized = (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
 
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-           	ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
-                ImGui::PopStyleVar(); 
-                if (opt_fullscreen)
-                    ImGui::PopStyleVar(2);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
+            ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+           	ImGui::Begin("DockSpace Demo", nullptr, window_flags);
+            ImGui::PopStyleColor(); // MenuBarBg
+		    ImGui::PopStyleVar(2);
 
-                
-                ImGuiIO& io = ImGui::GetIO();
-                ImGuiStyle& style = ImGui::GetStyle();
+            if (opt_fullscreen)
+                ImGui::PopStyleVar(2);
+
                 float minWinSizeX = style.WindowMinSize.x;
                 style.WindowMinSize.x = 370.0f;
                 if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
@@ -207,7 +221,7 @@ class SceneSceneEditorLayer : public Janus::Layer
 
                         if (selectedMaterialIndex < materials.size())
                         {
-                            Janus::Ref<Janus::MaterialInstance> material = materials[selectedMaterialIndex];
+                            Janus::Ref<Janus::Material> material = materials[selectedMaterialIndex];
                             ImGui::Text("Shader: %s", material->GetShader()->GetName().c_str());
                             {
                                 if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
@@ -217,7 +231,7 @@ class SceneSceneEditorLayer : public Janus::Layer
                                     bool useAlbedoMap = albedoTexToggle > 0; 
                                     glm::vec3 albedoColor = material->Get<glm::vec3>("u_AlbedoColor");
                                     //auto& albedoColor = material->GetVector3("u_MaterialUniforms.AlbedoColor");
-                                    Janus::Ref<Janus::Texture> albedoMap = material->TryGetResource("u_AlbedoTexture");
+                                    Janus::Ref<Janus::Texture2D> albedoMap = material->TryGetResource<Janus::Texture2D>("u_AlbedoTexture");
                                     if(albedoMap)
                                         ImGui::Image((void*)albedoMap->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                                     else {
@@ -230,7 +244,7 @@ class SceneSceneEditorLayer : public Janus::Layer
                                         std::string filename = Janus::Application::Get().OpenFile("");
                                         if (filename != "")
                                         {
-                                            albedoMap = Janus::Ref<Janus::Texture>::Create(filename);
+                                            albedoMap = Janus::Ref<Janus::Texture2D>::Create(filename);
                                             material->Set("u_AlbedoTexture", albedoMap);
                                             material->Set("u_AlbedoTexToggle", 1.0f);
                                         }
@@ -255,7 +269,7 @@ class SceneSceneEditorLayer : public Janus::Layer
                                 if (ImGui::CollapsingHeader("Normals", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
                                 {
                                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); 
-                                    Janus::Ref<Janus::Texture> normalMap = material->TryGetResource("u_NormalTexture");
+                                    Janus::Ref<Janus::Texture2D> normalMap = material->TryGetResource<Janus::Texture2D>("u_NormalTexture");
                                     if(normalMap)
                                         ImGui::Image((void*)normalMap->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                                     else {
@@ -268,7 +282,7 @@ class SceneSceneEditorLayer : public Janus::Layer
                                         std::string filename = Janus::Application::Get().OpenFile("");
                                         if (filename != "")
                                         {
-                                            normalMap = Janus::Ref<Janus::Texture>::Create(filename);
+                                            normalMap = Janus::Ref<Janus::Texture2D>::Create(filename);
                                             material->Set("u_NormalTexture", normalMap);
                                             material->Set("u_NormalTexToggle", 1.0f);
                                         }
@@ -282,7 +296,7 @@ class SceneSceneEditorLayer : public Janus::Layer
                                     float metalnessTexToggle = material->Get<float>("u_MetalnessTexToggle");
                                     bool useMetalnessMap = metalnessTexToggle > 0; 
 
-                                    Janus::Ref<Janus::Texture> metalnessMap = material->TryGetResource("u_MetalnessTexture");
+                                    Janus::Ref<Janus::Texture2D> metalnessMap = material->TryGetResource<Janus::Texture2D>("u_MetalnessTexture");
                                     if(metalnessMap)
                                         ImGui::Image((void*)metalnessMap->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                                     else {
@@ -310,7 +324,7 @@ class SceneSceneEditorLayer : public Janus::Layer
                                     float roughnessTexToggle = material->Get<float>("u_RoughnessTexToggle");
                                     bool useRoughnessMap = roughnessTexToggle > 0; 
 
-                                    Janus::Ref<Janus::Texture> roughnessMap = material->TryGetResource("u_RoughnessTexture");
+                                    Janus::Ref<Janus::Texture2D> roughnessMap = material->TryGetResource<Janus::Texture2D>("u_RoughnessTexture");
                                     if(roughnessMap)
                                         ImGui::Image((void*)roughnessMap->m_RendererID, ImVec2{ 64,64 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
                                     else {
@@ -324,7 +338,7 @@ class SceneSceneEditorLayer : public Janus::Layer
                                         std::string filename = Janus::Application::Get().OpenFile("");
                                         if (filename != "")
                                         {
-                                            roughnessMap = Janus::Ref<Janus::Texture>::Create(filename);
+                                            roughnessMap = Janus::Ref<Janus::Texture2D>::Create(filename);
                                             material->Set("u_RoughnessTexture", roughnessMap);
                                             material->Set("u_RoughnessTexToggle", 1.0f);
                                         }
@@ -471,13 +485,13 @@ class SceneSceneEditorLayer : public Janus::Layer
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
         bool m_AllowViewportCameraEvents;
-        Janus::Ref<Janus::Texture> m_CheckerboardTex;
+        Janus::Ref<Janus::Texture2D> m_CheckerboardTex;
 };
 
 class SceneEditor : public Janus::Application
 {
     public:
-        SceneEditor()
+        SceneEditor() : Application("Janus Editor - Example Scene")
         {
             PushLayer(new SceneSceneEditorLayer());
         }

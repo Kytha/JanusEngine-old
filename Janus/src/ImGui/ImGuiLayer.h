@@ -23,6 +23,7 @@ namespace Janus {
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 		
 		void SetDarkThemeColors();
+		void SetDarkThemeColorsV2();
 	private:
 		bool m_BlockEvents = true;
 	};

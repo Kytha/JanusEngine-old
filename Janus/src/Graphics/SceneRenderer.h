@@ -33,7 +33,7 @@ namespace Janus
 		static void BeginScene(const Scene *scene, const SceneRendererCamera &camera);
 		static void EndScene();
 
-		static void SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform = glm::mat4(1.0f), Ref<MaterialInstance> overrideMaterial = nullptr);
+		static void SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform = glm::mat4(1.0f), Ref<Material> overrideMaterial = nullptr);
 
 		//static Ref<RenderPass> GetFinalRenderPass();
 		static Ref<Framebuffer> GetFinalColorBuffer();

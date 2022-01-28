@@ -67,7 +67,6 @@ namespace Janus
         }
 
         m_MeshShader = Renderer::GetShaderLibrary()->Get("janus_pbr");
-        m_BaseMaterial = Material::Create(m_MeshShader);
 
         m_InverseTransform = glm::inverse(Mat4FromAssimpMat4(scene->mRootNode->mTransformation));
 
@@ -141,8 +140,8 @@ namespace Janus
                 auto aiMaterial = scene->mMaterials[i];
                 auto aiMaterialName = aiMaterial->GetName();
 
-                auto mi = Ref<MaterialInstance>::Create(m_BaseMaterial, aiMaterialName.data);
-                mi->SetFlag(MaterialFlag::TwoSided, false);
+                auto mi = Material::Create(m_MeshShader, aiMaterialName.data);
+                mi->SetFlag(MaterialFlag::TwoSided, true);
                 m_Materials[i] = mi;
 
                 aiString aiTexPath;
@@ -167,7 +166,7 @@ namespace Janus
                     auto parentPath = path.parent_path();
                     parentPath /= std::string(aiTexPath.data);
                     std::string texturePath = parentPath.string();
-                    auto texture = Ref<Texture>::Create(texturePath);
+                    auto texture = Ref<Texture2D>::Create(texturePath);
                     if (texture->Loaded())
                     {
                         m_Textures[i] = texture;
@@ -192,7 +191,7 @@ namespace Janus
                     auto parentPath = path.parent_path();
                     parentPath /= std::string(aiTexPath.data);
                     std::string texturePath = parentPath.string();
-                    auto texture = Ref<Texture>::Create(texturePath);
+                    auto texture = Ref<Texture2D>::Create(texturePath);
                     if (texture->Loaded())
                     {
                         mi->Set("u_NormalTexture", texture);
@@ -214,7 +213,7 @@ namespace Janus
                     auto parentPath = path.parent_path();
                     parentPath /= std::string(aiTexPath.data);
                     std::string texturePath = parentPath.string();
-                    auto texture = Ref<Texture>::Create(texturePath);
+                    auto texture = Ref<Texture2D>::Create(texturePath);
                     if (texture->Loaded())
                     {
                         mi->Set("u_RoughnessTexture", texture);
@@ -291,7 +290,7 @@ namespace Janus
                             auto parentPath = path.parent_path();
                             parentPath /= str;
                             std::string texturePath = parentPath.string();
-                            auto texture = Ref<Texture>::Create(texturePath);
+                            auto texture = Ref<Texture2D>::Create(texturePath);
                             if (texture->Loaded())
                             {
                                 mi->Set("u_MetalnessTexture", texture);

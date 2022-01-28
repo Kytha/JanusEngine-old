@@ -42,7 +42,7 @@ namespace Janus {
         Light m_Light;
     public:
         static Ref<Scene> CreateEmpty();
-        Ref<MaterialInstance> m_SkyboxMaterial;
+        Ref<Material> m_SkyboxMaterial;
     private:
         UUID m_SceneID;
         std::string m_DebugName;

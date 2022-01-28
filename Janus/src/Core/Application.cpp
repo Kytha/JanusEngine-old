@@ -16,12 +16,14 @@ namespace Janus
 
 	Application *Application::s_Instance = nullptr;
 
-	Application::Application()
+	Application::Application(const std::string& name)
 	{
 		// enforcing a single instance of application
 		JN_ASSERT(!s_Instance, "APPLICATION_ERROR: Application already exists!");
 		s_Instance = this;
-		m_Window = std::unique_ptr<Window>(Window::Create());
+		WindowProps windowProps;
+		windowProps.Title = name;
+		m_Window = std::unique_ptr<Window>(Window::Create(windowProps));
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 		Renderer::Init();
 		Renderer::WaitAndRender();

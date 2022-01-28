@@ -22,7 +22,7 @@ namespace Janus {
     void Scene::Init()
     {
 		auto skyboxShader = Renderer::GetShaderLibrary()->Get("janus_skybox");
-		m_SkyboxMaterial = MaterialInstance::Create(Material::Create(skyboxShader));
+		m_SkyboxMaterial = Material::Create(skyboxShader, "skybox_material");
 		m_SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
     }
 
@@ -56,7 +56,7 @@ namespace Janus {
             if (meshComponent.Mesh) 
             {
                 Entity e = Entity(entity, this);
-                Ref<MaterialInstance> overrideMaterial = nullptr;
+                Ref<Material> overrideMaterial = nullptr;
                 SceneRenderer::SubmitMesh(meshComponent.Mesh, transformComponent.GetTransform(), overrideMaterial);
             }
         }

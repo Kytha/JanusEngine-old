@@ -16,31 +16,36 @@ namespace Janus
 		Float16 = 3
 	};
 
-    class Texture : public RefCounted
+	class Texture : public RefCounted
+	{
+		public:
+			virtual ~Texture() {};
+			virtual void Bind(uint32_t slot = 0) = 0;
+		public:
+			static uint32_t Texture::CalculateMipMapCount(uint32_t width, uint32_t height);
+	};
+    class Texture2D : public Texture
     {
     public:
-        Texture(const std::string &filePath);
-        void Bind(int slot = 0);
+        Texture2D(const std::string &filePath);
+		~Texture2D() override;
+        virtual void Bind(uint32_t slot = 0) override;
         bool Loaded() const;
         uint32_t m_Width, m_Height;
         Buffer m_ImageData;
         std::string m_FilePath;
         uint32_t m_RendererID;
         bool m_Loaded = false;
-    public:
-        static uint32_t Texture::CalculateMipMapCount(uint32_t width, uint32_t height);
     };
 
-	class TextureCube : public RefCounted
+	class TextureCube : public Texture
 	{
 	public:
 		TextureCube(TextureFormat format, uint32_t width, uint32_t height);
 		TextureCube(TextureFormat format, uint32_t width, uint32_t height, void* data);
 		TextureCube(const std::string& path);
-		~TextureCube();
-
-		void Bind(uint32_t slot = 0) const;
-
+		~TextureCube() override;
+		virtual void Bind(uint32_t slot = 0) override;
 		TextureFormat GetFormat() const { return m_Format; }
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }

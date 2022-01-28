@@ -41,6 +41,8 @@ namespace Janus
             {
                 auto pFunc = (FuncT *)ptr;
                 (*pFunc)();
+                //static_assert(std::is_trivially_destructible_v<FuncT>, "FuncT must be trivially destructible");
+                pFunc->~FuncT();
             };
             auto storageBuffer = GetRenderCommandQueue().Allocate(renderCmd, sizeof(func));
             new (storageBuffer) FuncT(std::forward<FuncT>(func));
@@ -49,9 +51,9 @@ namespace Janus
         static void WaitAndRender();
         static void BeginRenderPass(Ref<RenderPass> renderPass, bool clear = true);
         static void EndRenderPass();
-        static void SubmitQuad(Ref<MaterialInstance> material, const glm::mat4 &transform = glm::mat4(1.0f));
-        static void SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform, Ref<MaterialInstance> overrideMaterial = nullptr);
-        static void SubmitFullscreenQuad(Ref<MaterialInstance> material);
+        static void SubmitQuad(Ref<Material> material, const glm::mat4 &transform = glm::mat4(1.0f));
+        static void SubmitMesh(Ref<Mesh> mesh, const glm::mat4 &transform, Ref<Material> overrideMaterial = nullptr);
+        static void SubmitFullscreenQuad(Ref<Material> material);
         static Ref<TextureCube> GetBlackCubeTexture();
         static Ref<ShaderLibrary> GetShaderLibrary();
 

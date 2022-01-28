@@ -6,7 +6,7 @@
 
 namespace Janus {
 
-    using MaterialList = std::vector<Ref<MaterialInstance>>;
+    using MaterialList = std::vector<Ref<Material>>;
 	class InspectorPanel
 	{
 	public:

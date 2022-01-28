@@ -65,8 +65,7 @@ namespace Janus
         void DumpVertexBuffer();
 
         Ref<Shader> GetMeshShader() { return m_MeshShader; }
-        Ref<Material> GetMaterial() { return m_BaseMaterial; }
-        const std::vector<Ref<MaterialInstance>> GetMaterials() { return m_Materials; }
+        const std::vector<Ref<Material>> GetMaterials() { return m_Materials; }
         const std::vector<Ref<Texture>> &GetTextures() const { return m_Textures; }
         const std::string &GetFilePath() const { return m_FilePath; }
         std::vector<Submesh> m_Submeshes;
@@ -88,10 +87,9 @@ namespace Janus
         const aiScene *m_Scene;
 
         // Materials
-        Ref<Material> m_BaseMaterial;
         std::vector<Ref<Texture>> m_Textures;
         std::vector<Ref<Texture>> m_NormalMaps;
-        std::vector<Ref<MaterialInstance>> m_Materials;
+        std::vector<Ref<Material>> m_Materials;
 
         std::string m_FilePath;
 

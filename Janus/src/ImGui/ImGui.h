@@ -126,10 +126,7 @@ namespace Janus::UI {
 		char buffer[256];
 		strcpy_s<256>(buffer, value.c_str());
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -169,10 +166,7 @@ namespace Janus::UI {
 
 		strcpy(s_MultilineBuffer, value.c_str());
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -225,10 +219,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		ImGui::InputText(s_IDBuffer, (char*)value, 256, ImGuiInputTextFlags_ReadOnly);
 		ImGui::PopStyleVar();
@@ -249,10 +240,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -282,10 +270,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -316,10 +301,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -350,10 +332,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -384,10 +363,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -418,10 +394,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -452,10 +425,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -486,10 +456,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -520,10 +487,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -554,10 +518,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -588,10 +549,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -622,10 +580,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -656,10 +611,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -690,10 +642,7 @@ namespace Janus::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -942,10 +891,7 @@ namespace Janus::UI {
 		ImGui::Text(label);
 		ImGui::SameLine();
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		sprintf_s(s_IDBuffer + 2, 14, "%o", s_Counter++);
+		GenerateID();
 
 		if (IsItemDisabled())
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
