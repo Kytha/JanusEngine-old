@@ -87,6 +87,8 @@ SET ( JANUS_HEADERS
     src/ImGui/ImGuiUtilities.h
     src/ImGui/Colours.h
     src/ImGui/ImGuiLayer.h
+    src/Asset/Asset.h
+    src/Asset/AssetTypes.h
   )
 
 ############################# DEPENDENCIES ###########################################

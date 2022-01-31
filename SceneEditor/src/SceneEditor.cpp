@@ -27,7 +27,7 @@ class SceneSceneEditorLayer : public Janus::Layer
 
             m_SceneHierarchyPanel->SetSelectionChangedCallback(std::bind(&SceneSceneEditorLayer::SelectEntity, this, std::placeholders::_1));
             m_SceneHierarchyPanel->SetEntityDeletedCallback(std::bind(&SceneSceneEditorLayer::OnEntityDeleted, this, std::placeholders::_1));
-            auto mesh = Janus::Ref<Janus::Mesh>::Create("./assets/tg1lch1fa_LOD0.fbx");
+            auto mesh = Janus::Ref<Janus::Mesh>::Create("./assets/tfxpcbcfa_LOD0.fbx");
             Janus::Entity entity = m_Scene->CreateEntity("bust");
             entity.AddComponent<Janus::MeshComponent>(mesh);
 

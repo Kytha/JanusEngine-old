@@ -1,0 +1,12 @@
+{
+  "Name": "Janus",
+  "Version": {
+    "Major": 1,
+    "Minor": 0,
+    "Build": 0
+  },
+  "Company": "Janus",
+  "Copyright": "Copyright (c) 2022-2032 Kyle Thatcher. All rights reserved.",
+  "GameTarget": "JanusGame",
+  "EditorTarget": "JanusEditor"
+}
