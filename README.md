@@ -40,7 +40,7 @@
 ---
 # About
       
-A cross-platform game engine built in C++ for creating 2D & 3D games. It is as much an educational project as a passion project.
+A cross-platform game engine built in C++ for creating 2D & 3D games. It is as much an educational project as a passion project. Janus Engine is in extremely early development, as such most features are not yet implemented.
       
 # Getting-Started
       
