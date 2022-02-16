@@ -1,6 +1,6 @@
 <h1 align="center">
     <a href="https://github.com/Kytha/JanusEngine">
-        <img src="var/docs/images/janusEngine.png" valign="middle" width="58" height="58" alt="kytha Janus Engine" />
+        <img src="docs/images/janusEngine.png" valign="middle" width="58" height="58" alt="kytha Janus Engine" />
     </a>
     <span valign="middle">
         Janus Engine
