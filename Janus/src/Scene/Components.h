@@ -8,7 +8,6 @@
 #include "Graphics/Texture.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Camera.h"
-#include "Asset/Asset.h"
 
 namespace Janus
 {
